@@ -50,8 +50,10 @@ def public_response(response):
 def test_tc_005_anonymous_local_navigation_and_labeled_form() -> None:
     client = create_app().test_client()
     sign_in = client.get("/sign-in").get_data(as_text=True)
-    assert '<a class="recovery-link" href="/forgot-password">Forgot password?</a>' in sign_in
-    page = client.get("/forgot-password")
+    anchor = re.search(r'<a class="recovery-link" href="([^"]+)">Forgot password\?</a>', sign_in)
+    assert anchor is not None
+    assert anchor.group(1) == "/forgot-password"
+    page = client.get(anchor.group(1))
     assert page.status_code == 200
     assert '<form method="post" action="/forgot-password">' in page.get_data(as_text=True)
     assert '<label for="email">Email address</label>' in page.get_data(as_text=True)
@@ -166,16 +168,24 @@ def test_tc_012_rolling_window_boundary_independent_accounts_and_unknowns() -> N
     csrf = csrf_from(client)
     sink = app.extensions["local_auth_demo"].sink
     acknowledgements = [submit(client, csrf, "a@example.test") for _ in range(5)]
-    assert len(sink.links_snapshot()) == 5
+    assert all(public_response(ack) == public_response(acknowledgements[0]) for ack in acknowledgements)
+    assert [event.recipient for event in sink.links_snapshot()] == ["a@example.test"] * 5
     clock.advance(3599)
     suppressed = submit(client, csrf, "a@example.test")
     assert public_response(suppressed) == public_response(acknowledgements[0])
     assert len(sink.links_snapshot()) == 5
-    assert submit(client, csrf, "b@example.test").status_code == 200
+    assert public_response(submit(client, csrf, "b@example.test")) == public_response(
+        acknowledgements[0]
+    )
     assert len(sink.links_snapshot()) == 6
+    assert [event.recipient for event in sink.links_snapshot()].count("a@example.test") == 5
+    assert [event.recipient for event in sink.links_snapshot()].count("b@example.test") == 1
     clock.advance(1)
-    assert submit(client, csrf, "a@example.test").status_code == 200
+    assert public_response(submit(client, csrf, "a@example.test")) == public_response(
+        acknowledgements[0]
+    )
     assert len(sink.links_snapshot()) == 7
+    assert [event.recipient for event in sink.links_snapshot()].count("a@example.test") == 6
     store = app.extensions["local_auth_demo"].store
     with store.lock:
         assert store.reset_requests["a@example.test"] == [clock.now()]

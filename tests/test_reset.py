@@ -76,12 +76,13 @@ def test_tc_013_replay_cannot_change_password_or_add_event() -> None:
     assert b"Password reset" in first.data
     services = app.extensions["local_auth_demo"]
     (event,) = services.sink.successes_snapshot()
-    assert event.recipient == "owner@example.test"
+    assert event.account_id == event.recipient == "owner@example.test"
 
     replay = complete(client, link, csrf, "Second!demo")
     unavailable = client.get(link)
     assert replay.status_code == unavailable.status_code == 200
     assert replay.data == unavailable.data
+    assert tuple(replay.headers.items()) == tuple(unavailable.headers.items())
     assert b"Reset link unavailable" in replay.data
     assert link.encode() not in replay.data
     assert services.sink.successes_snapshot() == (event,)
@@ -113,7 +114,8 @@ def test_tc_013_simultaneous_posts_only_one_wins() -> None:
     assert len(winners) == len(losers) == 1
     assert all(response.status_code == 200 for _, response in results)
     services = app.extensions["local_auth_demo"]
-    assert len(services.sink.successes_snapshot()) == 1
+    (success_event,) = services.sink.successes_snapshot()
+    assert success_event.account_id == success_event.recipient == "owner@example.test"
     with services.store.lock:
         account = services.store.accounts["owner@example.test"]
         assert account.session_epoch == 1
@@ -152,7 +154,10 @@ def test_tc_014_issue_time_boundary_and_open_form_expiry() -> None:
             assert token_record.consumed is should_succeed
         assert len(services.sink.successes_snapshot()) == int(should_succeed)
         assert (b"Password reset" in response.data) is should_succeed
-        if not should_succeed:
+        if should_succeed:
+            assert sign_in(app, "Old!demo")[1].status_code == 401
+            assert sign_in(app, password)[1].status_code == 302
+        else:
             assert b"Reset link unavailable" in response.data
             assert sign_in(app, password)[1].status_code == 401
             assert sign_in(app, "Old!demo")[1].status_code == 302
@@ -331,6 +336,14 @@ def test_tc_017_tc_019_tc_021_private_owner_events_and_server_pages() -> None:
     assert b"Reset link unavailable" in app.test_client().post(
         "/reset/invalid", data={"csrf_token": "any", "new_password": "Third!demo"}
     ).data
+    expired_link = issue_link(app)
+    expiring_client = app.test_client()
+    expiring_csrf = reset_form(expiring_client, expired_link)
+    clock.advance(1800)
+    expired = complete(expiring_client, expired_link, expiring_csrf, "Third!demo")
+    assert expired.status_code == 200
+    assert b"Reset link unavailable" in expired.data
+    assert expired_link.encode() not in expired.data
     assert services.sink.successes_snapshot() == successes
     fresh = create_app(synthetic_accounts={"owner@example.test": "Old!demo"})
     assert fresh.extensions["local_auth_demo"].sink.links_snapshot() == ()
