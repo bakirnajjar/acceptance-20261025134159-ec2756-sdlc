@@ -3,12 +3,13 @@ Synthetic Futuristic acceptance test repository for SDLC stage outputs. No real 
 
 ## Local Python scaffold
 
-This is a local-only Python 3.12 Flask/Jinja demonstration. It serves a
-server-rendered sign-in page and a GET-only forgot-password foundation, backed
-by isolated process-local state. Sign-in uses synthetic hashed credentials,
-CSRF-protected POSTs and revocable registry-backed sessions; recovery requests
-are not yet implemented (`POST /forgot-password` returns HTTP 405). No real
-accounts, identity service or email are used.
+This is a local-only Python 3.12 Flask/Jinja demonstration. It serves
+server-rendered sign-in, recovery-request and reset-link forms backed by
+isolated process-local state. Sign-in uses synthetic hashed credentials,
+CSRF-protected POSTs and revocable registry-backed sessions. Recovery accepts
+CSRF-protected email requests and records eligible links in a private in-memory
+sink, not an email service. Reset completion (`POST /reset/<token>`) is not yet
+implemented. No real accounts, identity service or email are used.
 
 Install [uv](https://docs.astral.sh/uv/) and make Python 3.12 available, then
 run from the repository root:
@@ -54,13 +55,19 @@ form obtains a per-client CSRF value on GET; successful sign-in redirects to
 every request. The sign-out form POST invalidates the registry entry and clears
 the cookie. Tests may pass their own `synthetic_accounts` mapping to `create_app`;
 each invocation creates a new locked store with independent accounts, sessions,
-quotas and reset-token indexes. A
-`Clock.now()` returning an aware UTC datetime and a URL-safe token generator
-may be injected for deterministic future recovery tests; defaults use the UTC
-system clock and `secrets.token_urlsafe(32)`. Session IDs use independent
-cryptographically random values; only SHA-256 digests are stored in the registry.
-Future reset operations must share the lock with sign-in transitions. No reset
-tokens, notifications or links are issued by the GET-only recovery foundation.
+quotas, reset-token indexes and private link events. A `Clock.now()` returning
+an aware UTC datetime and a secure URL-safe token generator may be injected
+for deterministic tests; defaults use the UTC system clock and
+`secrets.token_urlsafe(32)`. Session IDs use independent cryptographically
+random values; only SHA-256 digests are stored in the session and reset-token
+indexes. Eligible known accounts receive at most five accepted requests in
+the past rolling 3600 seconds. Known, unknown and suppressed valid submissions
+share a generic public acknowledgement. The private per-app sink is accessible
+only to same-process code/tests via
+`app.extensions["local_auth_demo"].sink.links_snapshot()`; never expose its
+bearer links over HTTP or logs. An unused link opens the reset form before
+1800 seconds from issuance, but no password changes until reset completion is
+implemented. Future reset commits must share the lock with sign-in transitions.
 
 `LOCAL_AUTH_DEMO_SECRET_KEY` is optional for a **local-only** fixed Flask
 signing key; without it, a fresh cryptographic key is generated per app

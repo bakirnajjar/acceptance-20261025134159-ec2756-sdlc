@@ -47,7 +47,17 @@ def test_tc_019_foundation_forms_are_server_rendered() -> None:
     assert signed_in.status_code == 302
     assert signed_in.headers["Location"].endswith("/account")
     assert "<h1>Account</h1>" in client.get("/account").get_data(as_text=True)
-    assert client.post("/forgot-password").status_code == 405
+    # Sign-in rotates the CSRF secret; use the current rendered request form.
+    current_forgot = client.get("/forgot-password").get_data(as_text=True)
+    forgot_csrf = re.search(r'name="csrf_token" value="([^"]+)"', current_forgot)
+    assert forgot_csrf is not None
+    recovery = client.post(
+        "/forgot-password",
+        data={"csrf_token": forgot_csrf.group(1), "email": "demo@example.test"},
+    )
+    assert recovery.status_code == 200
+    assert b"Request received" in recovery.data
+    assert b"demo@example.test" not in recovery.data
 
 
 def test_tc_020_synthetic_hashed_accounts_and_isolated_state() -> None:

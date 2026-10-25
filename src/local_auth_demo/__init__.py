@@ -1,10 +1,12 @@
 """Local-only Flask demonstration with isolated synthetic application state."""
 
+import logging
 import os
+import re
 import secrets
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from typing import Protocol
 
@@ -12,7 +14,38 @@ from flask import Flask, redirect, render_template, request, session, url_for
 from flask.sessions import SecureCookieSessionInterface
 from werkzeug.security import check_password_hash
 
-from .state import SAMPLE_ACCOUNTS, MemoryStore, SessionRecord, normalize_email
+from .state import (
+    SAMPLE_ACCOUNTS,
+    MemoryNotificationSink,
+    MemoryStore,
+    ResetTokenRecord,
+    SessionRecord,
+    normalize_email,
+)
+
+EMAIL_PATTERN = re.compile(
+    r"[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]+@"
+    r"(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}"
+)
+TOKEN_PATTERN = re.compile(r"[A-Za-z0-9_-]+")
+RESET_LIFETIME = timedelta(seconds=1800)
+RESET_WINDOW = timedelta(seconds=3600)
+
+
+class ResetPathLogFilter(logging.Filter):
+    """Redact bearer path components from Werkzeug's local access logs."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        message = record.getMessage()
+        redacted = re.sub(r"/reset/[A-Za-z0-9_-]+", "/reset/[redacted]", message)
+        if redacted != message:
+            record.msg = redacted
+            record.args = ()
+        return True
+
+
+# The local Flask CLI uses Werkzeug's process-wide access logger, not an app logger.
+logging.getLogger("werkzeug").addFilter(ResetPathLogFilter())
 
 
 class LocalSessionInterface(SecureCookieSessionInterface):
@@ -44,6 +77,7 @@ class AppServices:
     store: MemoryStore
     clock: Clock
     token_generator: Callable[[], str]
+    sink: MemoryNotificationSink
 
 
 def create_app(
@@ -58,15 +92,24 @@ def create_app(
     app.secret_key = os.environ.get("LOCAL_AUTH_DEMO_SECRET_KEY") or secrets.token_hex(32)
     app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
     app.session_interface = LocalSessionInterface()
+    store = MemoryStore.with_synthetic_accounts(
+        SAMPLE_ACCOUNTS if synthetic_accounts is None else synthetic_accounts
+    )
     app.extensions["local_auth_demo"] = AppServices(
-        store=MemoryStore.with_synthetic_accounts(
-            SAMPLE_ACCOUNTS if synthetic_accounts is None else synthetic_accounts
-        ),
+        store=store,
         clock=clock if clock is not None else UtcClock(),
         token_generator=(
             token_generator if token_generator is not None else lambda: secrets.token_urlsafe(32)
         ),
+        sink=MemoryNotificationSink(store.lock),
     )
+
+    @app.after_request
+    def protect_recovery_responses(response):
+        if request.path == "/forgot-password" or request.path.startswith("/reset/"):
+            response.headers["Cache-Control"] = "no-store"
+            response.headers["Referrer-Policy"] = "no-referrer"
+        return response
 
     def csrf_token() -> str:
         token = session.get("csrf_token")
@@ -168,8 +211,76 @@ def create_app(
         session.clear()
         return redirect(url_for("sign_in"))
 
-    @app.get("/forgot-password")
-    def forgot_password() -> str:
-        return render_template("forgot_password.html")
+    @app.route("/forgot-password", methods=["GET", "POST"])
+    def forgot_password():
+        if request.method == "GET":
+            return render_template("forgot_password.html", csrf_token=csrf_token())
+        if not valid_csrf():
+            return (
+                render_template(
+                    "forgot_password.html",
+                    csrf_token=csrf_token(),
+                    error="Your form expired. Please try again.",
+                ),
+                400,
+            )
+        email = normalize_email(request.form.get("email", ""))
+        if not EMAIL_PATTERN.fullmatch(email) or email.startswith(".") or ".." in email:
+            return (
+                render_template(
+                    "forgot_password.html",
+                    csrf_token=csrf_token(),
+                    error="Enter a valid email address.",
+                ),
+                400,
+            )
+
+        services = app.extensions["local_auth_demo"]
+        store = services.store
+        with store.lock:
+            account = store.accounts.get(email)
+            if account is not None:
+                now = services.clock.now()
+                recent = [
+                    instant
+                    for instant in store.reset_requests.get(account.id, ())
+                    if instant > now - RESET_WINDOW
+                ]
+                store.reset_requests[account.id] = recent
+                if len(recent) < 5:
+                    token = services.token_generator()
+                    if not isinstance(token, str) or not TOKEN_PATTERN.fullmatch(token):
+                        raise ValueError("Reset token source must return a URL-safe token")
+                    digest = session_digest(token)
+                    # Do not overwrite an outstanding link if a source repeats a value.
+                    if digest in store.reset_tokens:
+                        raise ValueError("Reset token source returned a duplicate token")
+                    store.reset_tokens[digest] = ResetTokenRecord(account.id, now)
+                    store.reset_requests[account.id].append(now)
+                    services.sink.record_link(
+                        account.id,
+                        account.email,
+                        url_for("reset_password", token=token),
+                        now,
+                    )
+        return render_template("forgot_acknowledgement.html")
+
+    @app.get("/reset/<token>")
+    def reset_password(token: str):
+        services = app.extensions["local_auth_demo"]
+        valid = False
+        if TOKEN_PATTERN.fullmatch(token):
+            with services.store.lock:
+                record = services.store.reset_tokens.get(session_digest(token))
+                now = services.clock.now()
+                valid = (
+                    record is not None
+                    and not record.consumed
+                    and record.account_id in services.store.accounts
+                    and record.issued_at <= now < record.issued_at + RESET_LIFETIME
+                )
+        if not valid:
+            return render_template("reset_unavailable.html")
+        return render_template("reset_password.html", token=token, csrf_token=csrf_token())
 
     return app

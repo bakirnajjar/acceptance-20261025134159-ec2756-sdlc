@@ -41,6 +41,30 @@ class ResetTokenRecord:
     consumed: bool = False
 
 
+@dataclass(frozen=True)
+class ResetLinkEvent:
+    account_id: str
+    recipient: str
+    url: str
+    issued_at: datetime
+
+
+class MemoryNotificationSink:
+    """Private per-app link delivery; snapshots are only for same-process callers."""
+
+    def __init__(self, lock: RLock) -> None:
+        self._lock = lock
+        self._links: list[ResetLinkEvent] = []
+
+    def record_link(self, account_id: str, recipient: str, url: str, issued_at: datetime) -> None:
+        with self._lock:
+            self._links.append(ResetLinkEvent(account_id, recipient, url, issued_at))
+
+    def links_snapshot(self) -> tuple[ResetLinkEvent, ...]:
+        with self._lock:
+            return tuple(self._links)
+
+
 @dataclass
 class MemoryStore:
     """One instance per app; future services index only session/token digests."""
