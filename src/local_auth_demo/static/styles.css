@@ -1,0 +1,30 @@
+/* Minimal local foundation; the pictured sign-in treatment belongs to TASK-002. */
+body {
+  margin: 0;
+  background: #fff;
+  color: #202020;
+  font: 1rem/1.5 system-ui, sans-serif;
+}
+
+.page {
+  max-width: 28rem;
+  margin: 3rem auto;
+  padding: 1rem;
+}
+
+.panel {
+  border: 1px solid #333;
+  padding: 1.5rem;
+}
+
+label, input, button {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+label { margin-top: 1rem; }
+input, button { padding: .5rem; font: inherit; }
+button { margin-top: 1.5rem; cursor: pointer; }
+a { color: #0645ad; }
+:focus-visible { outline: 2px solid #0645ad; outline-offset: 2px; }
