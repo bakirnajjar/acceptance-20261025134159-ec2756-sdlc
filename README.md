@@ -8,8 +8,10 @@ server-rendered sign-in, recovery-request and reset-link forms backed by
 isolated process-local state. Sign-in uses synthetic hashed credentials,
 CSRF-protected POSTs and revocable registry-backed sessions. Recovery accepts
 CSRF-protected email requests and records eligible links in a private in-memory
-sink, not an email service. Reset completion (`POST /reset/<token>`) is not yet
-implemented. No real accounts, identity service or email are used.
+sink, not an email service. A valid reset link opens a CSRF-protected new-password
+form; submitting it once before expiry changes the synthetic password, revokes
+that account's sessions and records a private in-memory success event. No real
+accounts, identity service or email are used.
 
 Install [uv](https://docs.astral.sh/uv/) and make Python 3.12 available, then
 run from the repository root:
@@ -65,9 +67,10 @@ the past rolling 3600 seconds. Known, unknown and suppressed valid submissions
 share a generic public acknowledgement. The private per-app sink is accessible
 only to same-process code/tests via
 `app.extensions["local_auth_demo"].sink.links_snapshot()`; never expose its
-bearer links over HTTP or logs. An unused link opens the reset form before
-1800 seconds from issuance, but no password changes until reset completion is
-implemented. Future reset commits must share the lock with sign-in transitions.
+bearer links over HTTP or logs. Success notifications are accessible only to
+same-process code/tests via `sink.successes_snapshot()`; no delivery is
+performed. An unused link can complete a reset strictly before 1800 seconds
+from issuance. Reset commits share the lock with sign-in transitions.
 
 `LOCAL_AUTH_DEMO_SECRET_KEY` is optional for a **local-only** fixed Flask
 signing key; without it, a fresh cryptographic key is generated per app

@@ -12,7 +12,7 @@ from typing import Protocol
 
 from flask import Flask, redirect, render_template, request, session, url_for
 from flask.sessions import SecureCookieSessionInterface
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from .state import (
     SAMPLE_ACCOUNTS,
@@ -127,6 +127,22 @@ def create_app(
             and bool(expected)
             and secrets.compare_digest(expected, supplied)
         )
+
+    def available_reset_record(
+        store: MemoryStore, token: str, now: datetime
+    ) -> ResetTokenRecord | None:
+        """Call only while holding store.lock; a POST must check again at commit."""
+        if not TOKEN_PATTERN.fullmatch(token):
+            return None
+        record = store.reset_tokens.get(session_digest(token))
+        if (
+            record is None
+            or record.consumed
+            or record.account_id not in store.accounts
+            or not (record.issued_at <= now < record.issued_at + RESET_LIFETIME)
+        ):
+            return None
+        return record
 
     def current_account_id() -> str | None:
         token = session.get("session_id")
@@ -265,22 +281,54 @@ def create_app(
                     )
         return render_template("forgot_acknowledgement.html")
 
-    @app.get("/reset/<token>")
+    @app.route("/reset/<token>", methods=["GET", "POST"])
     def reset_password(token: str):
         services = app.extensions["local_auth_demo"]
-        valid = False
-        if TOKEN_PATTERN.fullmatch(token):
-            with services.store.lock:
-                record = services.store.reset_tokens.get(session_digest(token))
-                now = services.clock.now()
-                valid = (
-                    record is not None
-                    and not record.consumed
-                    and record.account_id in services.store.accounts
-                    and record.issued_at <= now < record.issued_at + RESET_LIFETIME
-                )
-        if not valid:
+        store = services.store
+        with store.lock:
+            available = available_reset_record(store, token, services.clock.now()) is not None
+        if not available:
             return render_template("reset_unavailable.html")
-        return render_template("reset_password.html", token=token, csrf_token=csrf_token())
+        if request.method == "GET":
+            return render_template("reset_password.html", token=token, csrf_token=csrf_token())
+        if not valid_csrf():
+            return (
+                render_template(
+                    "reset_password.html",
+                    token=token,
+                    csrf_token=csrf_token(),
+                    error="Your form expired. Please try again.",
+                ),
+                400,
+            )
+        password = request.form.get("new_password", "")
+        if not password:
+            return (
+                render_template(
+                    "reset_password.html",
+                    token=token,
+                    csrf_token=csrf_token(),
+                    error="Enter a new password.",
+                ),
+                400,
+            )
+
+        # Hash before taking the shared lock; expiry and consumption are checked
+        # again under that lock before any account/session/notification mutation.
+        password_hash = generate_password_hash(password)
+        with store.lock:
+            now = services.clock.now()
+            record = available_reset_record(store, token, now)
+            if record is None:
+                return render_template("reset_unavailable.html")
+            account = store.accounts[record.account_id]
+            account.password_hash = password_hash
+            record.consumed = True
+            account.session_epoch += 1
+            for digest, active in list(store.sessions.items()):
+                if active.account_id == account.id:
+                    del store.sessions[digest]
+            services.sink.record_success(account.id, account.email, now)
+        return render_template("reset_success.html")
 
     return app

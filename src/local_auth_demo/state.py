@@ -49,12 +49,20 @@ class ResetLinkEvent:
     issued_at: datetime
 
 
+@dataclass(frozen=True)
+class ResetSuccessEvent:
+    account_id: str
+    recipient: str
+    completed_at: datetime
+
+
 class MemoryNotificationSink:
-    """Private per-app link delivery; snapshots are only for same-process callers."""
+    """Private per-app reset events; snapshots are only for same-process callers."""
 
     def __init__(self, lock: RLock) -> None:
         self._lock = lock
         self._links: list[ResetLinkEvent] = []
+        self._successes: list[ResetSuccessEvent] = []
 
     def record_link(self, account_id: str, recipient: str, url: str, issued_at: datetime) -> None:
         with self._lock:
@@ -63,6 +71,14 @@ class MemoryNotificationSink:
     def links_snapshot(self) -> tuple[ResetLinkEvent, ...]:
         with self._lock:
             return tuple(self._links)
+
+    def record_success(self, account_id: str, recipient: str, completed_at: datetime) -> None:
+        with self._lock:
+            self._successes.append(ResetSuccessEvent(account_id, recipient, completed_at))
+
+    def successes_snapshot(self) -> tuple[ResetSuccessEvent, ...]:
+        with self._lock:
+            return tuple(self._successes)
 
 
 @dataclass

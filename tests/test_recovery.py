@@ -118,7 +118,12 @@ def test_tc_010_private_digest_link_and_usable_reset_get() -> None:
     assert page.headers["Referrer-Policy"] == "no-referrer"
     assert app.test_client().get(event.url).status_code == 200  # GET does not consume.
     assert services.sink.links_snapshot() == (event,)
-    assert app.test_client().post(event.url).status_code == 405  # T005 handles reset POST.
+    rejected = app.test_client().post(event.url, data={"new_password": "NotAccepted!"})
+    assert rejected.status_code == 400  # Missing CSRF never consumes the link.
+    assert b'role="alert"' in rejected.data
+    with services.store.lock:
+        assert not services.store.reset_tokens[digest].consumed
+    assert services.sink.successes_snapshot() == ()
 
 
 def test_tc_011_equivalent_public_responses_and_distinct_private_effects() -> None:
