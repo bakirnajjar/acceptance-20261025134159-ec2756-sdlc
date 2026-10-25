@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Account · Local auth demo{% endblock %}
+{% block content %}
+  <section class="panel">
+    <h1>Account</h1>
+    <p>You are signed in.</p>
+    {% if error %}<p class="form-error" id="sign-out-error" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" action="{{ url_for('sign_out') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit">Sign out</button>
+    </form>
+  </section>
+{% endblock %}

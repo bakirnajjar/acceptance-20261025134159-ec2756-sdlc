@@ -1,0 +1,23 @@
+# UI analysis assessment
+
+## Evidence and applicability
+
+Applicable: one supplied sign-in wireframe depicts a user-facing page for the requested password-reset application. Its attachment reference is `attachment / 941402b9-bfd8-414c-a6e4-2fc2dce190a1 / sign-in-wireframe.png` (the attachment tool returned the reference only; the image was directly visible in the user's message). The complete user story is `user_story / user_story / characters 0-16000` (`next_offset: null`). The approved `requirements_analysis` stage was read by stage key, including REQ-001 through REQ-024; the platform did not supply a source locator for that stage output. The approved risk output was also read by its stage key; it identifies prospective risks, not observed application defects. A curated account-recovery standard was found under `knowledge / bcf198d8-a628-401c-8641-b726fcbd00b5 / v1, chunk 0`; other search hits contained the same wording, not independent standards.
+
+## Observed screen and requirement crosswalk
+
+**Observed** in the supplied image: a white page with a centered, thin dark-outlined rectangular card; a prominent "Sign in" heading; an "Email address" label and input with `name@example.com` placeholder; a "Password" label and input showing `********`; a blue, underlined "Forgot password?" link; a wide dark "Sign in" button; and the footer "No account? Contact your administrator." These visible elements correspond to REQ-001 through REQ-007. Source: `attachment / 941402b9-bfd8-414c-a6e4-2fc2dce190a1 / sign-in-wireframe.png`. The wireframe shows a masked-looking placeholder but does not establish actual password-input behavior, keyboard interaction, contrast compliance, click destinations, or a working authenticated session.
+
+The link's intended reset-request destination is specified by approved REQ-005 and the standard, but is not observable as an interaction in this static image. The standard's ACC-STD-01 requires the link, identical public known/unknown reset-request responses and a five-per-account-per-hour limit; ACC-STD-02 requires single-use links expiring 30 minutes after issuance and all-session invalidation on completion; ACC-STD-03 requires owner notification after every successful reset. Source: `knowledge / bcf198d8-a628-401c-8641-b726fcbd00b5 / v1, chunk 0`.
+
+## UI coverage and gaps for planning
+
+Only the sign-in screen is pictured. No reset-request, generic acknowledgement, new-password, invalid/used/expired-link, successful-reset, authenticated-result, or notification presentation is supplied. REQ-008 through REQ-017 have no directly pictured completed behavior; REQ-018 through REQ-024 concern implementation, delivery or verification, not visible wireframe coverage. Proposed (inferred, not observed) UI flows should describe sign-in and recovery navigation, submitting an email and receiving the same public acknowledgement for known and unknown accounts, opening a locally captured reset link to set a new password, handling invalid/used/expired links without disclosing secrets, and returning to sign-in after success. Link availability in the in-memory sink is for local demonstration and tests, not a public reset-response detail (approved predecessor assumption A3). No live app, test results, interaction recordings, reset-page visual specification, or production delivery evidence was provided.
+
+The eventual analysis should distinguish each image-backed **Observed** finding from **Proposed** designs; link findings only to approved requirement IDs; include keyboard and focus order, visible focus, color contrast, associated field labels, screen-reader names, errors/validation, and empty/loading states for each applicable screen. It should identify requirements with no visible UI coverage rather than claim that the wireframe establishes them.
+
+## Assumptions and open questions
+
+Carry forward the approved predecessor's bounded assumptions: reset identifier is an email; locally demonstrable synthetic sign-in is sufficient; known-account links and notifications are locally observable in the in-memory sink; the five-per-hour known-account limit is interpreted as rolling; expiry is treated as invalid at or after 30 minutes from issuance. These are interpretations, not visual observations. The exact reset-page layout and copy, sign-in success state/password policy, presentation of invalid or expired links, and how to demonstrate the notification sink without leaking links publicly remain open. None requires guessing at an observed design during this assessment; propose designs explicitly at the approved execution stage.
+
+No product output was written during assessment. Planning and its approval precede the UI contract and readable document.

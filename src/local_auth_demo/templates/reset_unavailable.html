@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Reset link unavailable · Local auth demo{% endblock %}
+{% block content %}
+  <section class="panel">
+    <h1>Reset link unavailable</h1>
+    <p>This reset link is unavailable. Request a new one to continue.</p>
+    <p><a href="{{ url_for('forgot_password') }}">Request a new link</a></p>
+  </section>
+{% endblock %}

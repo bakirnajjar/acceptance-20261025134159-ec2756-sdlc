@@ -1,0 +1,28 @@
+# Coding-stage assessment
+
+## Scope and evidence
+
+The full pinned story requests a local Python 3.12 Flask/Jinja password-reset demonstration, synthetic accounts, an in-memory notification sink, pytest automation, production-limitations documentation, and **no deployment or deployment workflows**. Approved `solution_design`, `test_case_design`, `requirements_analysis`, and `ui_analysis` outputs were read through the stage-output interface; the curated account-recovery standard (source reference `bcf198d8-a628-401c-8641-b726fcbd00b5`, `v1, chunk 0`) requires identical public account-recovery responses, at most five reset requests per account per hour, single-use links expiring after 30 minutes, sign-out of every active session after reset, and owner notification. The approved design interprets the quota as a rolling 3600-second window for known synthetic accounts and expiry as invalid at issuance +1800 seconds.
+
+The attached static `sign-in-wireframe.png` (attachment `941402b9-bfd8-414c-a6e4-2fc2dce190a1`) shows a centered thin dark rectangular outline on white, bold "Sign in", "Email address" with `name@example.com`, "Password" with `********`, a blue underlined "Forgot password?" link, a wide dark "Sign in" button, and "No account? Contact your administrator." below the controls within the card. It does **not** establish functional behavior, actual password masking, browser accessibility, or the design of unpictured pages.
+
+## Repository and tooling baseline
+
+- The repository contains the README identifying a synthetic acceptance repository, approved SDLC documents under `docs/sdlc/`, and prior-stage artifacts. There is no Flask package, template, stylesheet, synthetic account fixture, test, package manifest/lock, or application startup instruction. The worktree was clean at assessment. No tracked deployment workflow was found.
+- `/usr/bin/python3.12` reports Python 3.12.3; `python3.12 -m venv` is available. `python3.12 -m pytest --version` fails because pytest is not installed, and importing Flask fails because Flask is not installed. No test can run yet. Installing pinned dependencies and establishing a passing scaffold test are prerequisites for executable checkpoints.
+- The approved design lists only the repository-root test gate `python3.12 -m pytest`; its build and lint gate lists are empty. The greenfield-delivery skill expects working build/test/lint commands and a dependency lock. Plan approval should reconcile that with the design without treating an unapproved extra tool as an existing gate; a lightweight syntax/build check and existing-stack formatting/lint option can be proposed explicitly. Do not claim a baseline test pass.
+- No live database, mail/SMS transport, hosted service, or Docker service is necessary: the architecture is intentionally one local process and uses only in-process synthetic state. No deployment, credentials, remote service access, or changes under `.github/workflows/` are authorized.
+
+## Design coverage and delivery dependencies
+
+Keep the suggested ledger mapping intact: scaffold `T001`, design `TASK-001` through `TASK-006` as `T002` through `T007`, and the report/test-map closing task `T008`. Foundation (`REQ-018`–`REQ-020`) establishes per-factory stores, UTC clock, templates and hashed sample accounts; sign-in (`REQ-001`–`REQ-004`, `REQ-006`–`REQ-008`) adds the pictured UI, CSRF, and revocable sessions; recovery (`REQ-005`, `REQ-009`–`REQ-012`, `REQ-021`) adds private tokens and per-account quota; atomic completion (`REQ-013`–`REQ-017`) adds one-time issuance-based expiry, password update, all-session revocation and one owner event; the regression task (`REQ-022`) maps `TC-001`–`TC-022`; documentation and delivery audit (`REQ-023`, `REQ-024`) remain local-only. `TC-023` and `TC-024` require documentation/repository and action-record inspection rather than a claim that pytest proves them. The final artifact must map all `TC-001`–`TC-024` in `tests.json` and explain any manual/browser-only portions truthfully.
+
+## Principal risks and verification approach
+
+- Public parity must compare status, public headers and body in equivalent CSRF/session contexts for eligible known, unknown and quota-suppressed requests; private sink counts must differ appropriately. Never publish bearer links or sink contents over HTTP or log sensitive passwords/tokens.
+- Lock quota accounting, token consumption, password-hash mutation, session creation/revocation and success-event recording coherently. Exercise five accepted links, suppressed sixth at +3599, renewed eligibility at +3600; unused links at +29:59 versus +30:00; POST-time expiry; replay and simultaneous submissions; multiple independently authenticated cookie jars and unaffected other accounts.
+- A server-signed browser cookie alone must not authenticate: protected requests consult a revocable in-memory session registry and account epoch. Isolate account/session/token/quota/sink state between application factories and never use real account material or notification delivery.
+- Assert HTML semantics, associated labels, CSRF controls and stylesheet declarations in pytest, but classify pixel fidelity, actual browser masking, focus/keyboard behavior and manual visual inspection honestly. The unpictured recovery/error/account pages are proposed, not wireframe-observed.
+- Document process restart loss, single-worker limits, non-durable quota/revocation, no real mail, and production security/operational work. Audit final changes for forbidden deploy scripts, workflows, hosting configuration and deployment instructions, and do not deploy.
+
+Assessment only: no product source files were changed. Planning and execution require the platform's plan approval.

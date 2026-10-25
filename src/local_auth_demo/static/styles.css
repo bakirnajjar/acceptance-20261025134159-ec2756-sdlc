@@ -1,0 +1,73 @@
+body {
+  margin: 0;
+  background: #fff;
+  color: #202020;
+  font: 14px/1.4 Arial, sans-serif;
+}
+
+.page {
+  box-sizing: border-box;
+  width: min(100%, 340px);
+  margin: 20px auto;
+}
+
+.panel {
+  border: 1px solid #333;
+  padding: 20px 34px 16px;
+}
+
+.panel h1 {
+  font-size: 24px;
+  line-height: 1.25;
+  margin: 0 0 12px;
+}
+
+label, input, button {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+label {
+  margin: 10px 0 4px;
+  font-weight: 600;
+}
+
+input:not([type="hidden"]) {
+  border: 1px solid #777;
+  border-radius: 0;
+  height: 32px;
+  padding: 5px 8px;
+  font: inherit;
+}
+
+button {
+  border: 0;
+  background: #292929;
+  color: #fff;
+  height: 34px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+a { color: #0645ad; text-decoration: underline; }
+
+:focus-visible {
+  outline: 2px solid #0645ad;
+  outline-offset: 2px;
+}
+
+.recovery-link {
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.sign-in-panel button { margin-top: 15px; }
+.sign-in-footer { margin: 18px 0 0; }
+.form-error { color: #a21919; margin: 8px 0; }
+
+@media (max-width: 340px) {
+  .page { padding: 0 12px; }
+  .panel { padding-inline: 18px; }
+}

@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "stage": "ui_analysis",
+  "source_references": [
+    {"source_type": "attachment", "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1", "locator": "sign-in-wireframe.png"},
+    {"source_type": "user_story", "source_id": "user_story", "locator": "characters 0-16000"},
+    {"source_type": "knowledge", "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5", "locator": "v1, chunk 0"}
+  ],
+  "assumptions": [
+    "A1. Locally defined synthetic credentials can sign in to demonstrate reset and session invalidation; no additional password policy, production identity provider, persistent account store or particular post-sign-in UX is specified.",
+    "A2. The reset-request identifier is an email; reset pages are simply server-rendered, with exact appearance and error copy unspecified.",
+    "A3. Links for eligible known synthetic accounts and successful-reset notifications are observable through an in-memory sink for authorized local demonstration and tests; no real email is sent and no public reset response contains a link.",
+    "A4. The five-per-account-per-hour limit is interpreted as a rolling hour for known synthetic accounts; no numeric quota for nonexistent accounts is inferred and their public response remains indistinguishable.",
+    "A5. An unused link is usable before 30 minutes from issuance and invalid at or after that boundary; the boundary convention is an interpretation, not a literal quote from ACC-STD-02.",
+    "Only a static sign-in wireframe is supplied. No live app, interaction, reset-page design, accessibility evaluation, runtime behavior or test result is evidenced; the approved requirements were read under requirements_analysis without a returned source locator, so no stage_output citation is asserted."
+  ],
+  "open_questions": [
+    {"question": "What exact layout and copy should the unpictured recovery, error, success and authenticated screens use?", "blocking": false, "context": "Only the sign-in screen is pictured; proposed screen structure is not a visual observation."},
+    {"question": "What password rules, if any, and what minimal sign-in success UX should be chosen?", "blocking": false, "context": "A1 does not authorize inventing an additional password policy or a production identity integration."},
+    {"question": "Should invalid, used and expired links share one neutral error message, or vary without disclosing a token or account?", "blocking": false, "context": "The standard requires single use and issuance-based expiry but does not dictate public error wording."},
+    {"question": "How will authorized local demonstrators inspect the in-memory sink without placing links or notifications on public pages?", "blocking": false, "context": "A3 requires private local observability, not a public recovery-link display."},
+    {"question": "What validation copy and perceptible submission-progress treatment are suitable for the server-rendered forms?", "blocking": false, "context": "Keep known, unknown and rate-limited reset-request responses identical after valid submission."}
+  ],
+  "applicability": "applicable",
+  "not_applicable_reason": null,
+  "findings": [
+    {
+      "provenance": "Observed",
+      "statement": "The static sign-in wireframe shows a white page with a centered, thin dark-outlined rectangular card and a prominent bold “Sign in” heading; it does not establish rendered behavior.",
+      "source_references": [{"source_type": "attachment", "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1", "locator": "sign-in-wireframe.png"}],
+      "requirement_ids": ["REQ-001"]
+    },
+    {
+      "provenance": "Observed",
+      "statement": "The pictured card has an “Email address” label and input displaying the `name@example.com` placeholder.",
+      "source_references": [{"source_type": "attachment", "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1", "locator": "sign-in-wireframe.png"}],
+      "requirement_ids": ["REQ-002"]
+    },
+    {
+      "provenance": "Observed",
+      "statement": "The pictured card has a “Password” label and input displaying masked-looking `********` placeholder characters; actual typed-character masking is not observable.",
+      "source_references": [{"source_type": "attachment", "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1", "locator": "sign-in-wireframe.png"}],
+      "requirement_ids": ["REQ-003"]
+    },
+    {
+      "provenance": "Observed",
+      "statement": "A blue underlined “Forgot password?” link is pictured below the password input; its destination is not observable in the static image.",
+      "source_references": [{"source_type": "attachment", "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1", "locator": "sign-in-wireframe.png"}],
+      "requirement_ids": ["REQ-004"]
+    },
+    {
+      "provenance": "Observed",
+      "statement": "The card shows a wide dark “Sign in” button, without evidence of submission behavior.",
+      "source_references": [{"source_type": "attachment", "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1", "locator": "sign-in-wireframe.png"}],
+      "requirement_ids": ["REQ-006"]
+    },
+    {
+      "provenance": "Observed",
+      "statement": "The sign-in view shows the footer “No account? Contact your administrator.”",
+      "source_references": [{"source_type": "attachment", "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1", "locator": "sign-in-wireframe.png"}],
+      "requirement_ids": ["REQ-007"]
+    },
+    {
+      "provenance": "Proposed",
+      "statement": "Make the pictured password field actually mask typed characters, preserve its visible placeholder and label, and make the sign-in controls keyboard-operable with visible focus, associated labels and clear accessible validation; none of these interaction properties is demonstrated by the image.",
+      "source_references": [{"source_type": "attachment", "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1", "locator": "sign-in-wireframe.png"}],
+      "requirement_ids": ["REQ-002", "REQ-003", "REQ-004", "REQ-006"]
+    },
+    {
+      "provenance": "Proposed",
+      "statement": "Following “Forgot password?” should open a server-rendered reset-request form with a labeled email field, submit action and sign-in return route; the pictured link alone does not prove this destination.",
+      "source_references": [
+        {"source_type": "attachment", "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1", "locator": "sign-in-wireframe.png"},
+        {"source_type": "user_story", "source_id": "user_story", "locator": "characters 0-16000"},
+        {"source_type": "knowledge", "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5", "locator": "v1, chunk 0"}
+      ],
+      "requirement_ids": ["REQ-005", "REQ-009", "REQ-019"]
+    },
+    {
+      "provenance": "Proposed",
+      "statement": "Submitting valid local synthetic credentials should reach a minimal authenticated result backed by an active session; sign-in error, empty fields and progress should be understandable without displaying a password. The result and session are unpictured.",
+      "source_references": [{"source_type": "user_story", "source_id": "user_story", "locator": "characters 0-16000"}],
+      "requirement_ids": ["REQ-008", "REQ-019"]
+    },
+    {
+      "provenance": "Proposed",
+      "statement": "After a syntactically valid reset request, show the same public acknowledgement and response outcome for known, unknown and rate-limited identifiers; disclose neither existence nor link. For eligible known synthetic accounts, record a usable link only in the local in-memory sink; a sixth request within a rolling hour issues no further link, without changing the public UI.",
+      "source_references": [
+        {"source_type": "user_story", "source_id": "user_story", "locator": "characters 0-16000"},
+        {"source_type": "knowledge", "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5", "locator": "v1, chunk 0"}
+      ],
+      "requirement_ids": ["REQ-009", "REQ-010", "REQ-011", "REQ-012", "REQ-019"]
+    },
+    {
+      "provenance": "Proposed",
+      "statement": "Opening an unused link before 30 minutes since issuance should present a server-rendered new-password form with masked labeled input and accessible validation; successful submission updates the password and consumes that link once. A token that is invalid, already used or at/after the 30-minute boundary should instead reach a neutral error state with a fresh-request path, without changing the password or exposing token/account details.",
+      "source_references": [
+        {"source_type": "user_story", "source_id": "user_story", "locator": "characters 0-16000"},
+        {"source_type": "knowledge", "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5", "locator": "v1, chunk 0"}
+      ],
+      "requirement_ids": ["REQ-010", "REQ-013", "REQ-014", "REQ-015", "REQ-019"]
+    },
+    {
+      "provenance": "Proposed",
+      "statement": "A successful reset should show a neutral confirmation and sign-in route, never the new password or a link. Completion invalidates every previous session and records an owner notification after each success in the local in-memory sink, not in a public notification page or external email; the confirmation itself cannot prove those effects.",
+      "source_references": [
+        {"source_type": "user_story", "source_id": "user_story", "locator": "characters 0-16000"},
+        {"source_type": "knowledge", "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5", "locator": "v1, chunk 0"}
+      ],
+      "requirement_ids": ["REQ-015", "REQ-016", "REQ-017", "REQ-019"]
+    }
+  ]
+}

@@ -1,0 +1,764 @@
+{
+  "schema_version": "1.0",
+  "stage": "test_case_design",
+  "source_references": [
+    {
+      "source_type": "user_story",
+      "source_id": "user_story",
+      "locator": "characters 0-8000"
+    },
+    {
+      "source_type": "attachment",
+      "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+      "locator": "sign-in-wireframe.png"
+    },
+    {
+      "source_type": "knowledge",
+      "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+      "locator": "v1, chunk 0"
+    }
+  ],
+  "assumptions": [
+    "These are proposed verification scenarios, not executed checks; the reviewed repository does not yet have a runnable application or pytest suite. Routes such as /sign-in, /forgot-password and /account follow approved solution design, not observed existing behavior.",
+    "An isolated Python 3.12 Flask app factory, synthetic accounts, private same-process notification sink, injectable UTC clock and independent cookie jars provide deterministic local pytest fixtures; no real user, external notification or deployment is used.",
+    "The five-accepted-requests-per-account-per-hour rule is interpreted as a rolling 3600-second window for each known synthetic account; no numeric limit for unknown identifiers is inferred. Equivalent syntactically valid requests retain an identical public outcome.",
+    "An unused link is usable strictly before its issuance time plus 1800 seconds and invalid at or after that instant; this boundary convention implements the approved interpretation of the 30-minute lifetime.",
+    "The image establishes static sign-in appearance only. Masking, navigation, focus, browser accessibility and pixel fidelity require implementation and inspection; no runtime behavior is attributed to the image.",
+    "Only a nonempty new password is assumed. No password maximum length, additional composition policy, exact unpictured-page copy, or unknown-account quota is specified.",
+    "TC-023 and TC-024 require documentation, repository and accessible work-record inspection rather than pytest; inaccessible deployment records leave the no-deployment-action part unverified, not implicitly passed."
+  ],
+  "open_questions": [
+    {
+      "question": "What exact layout and copy should unpictured reset-request, invalid-link, success and signed-in pages use?",
+      "blocking": false,
+      "context": "The supplied image depicts only sign-in; tests assert structure and behavior without inventing exact recovery copy."
+    },
+    {
+      "question": "Is a further password policy, maximum length or particular authenticated-success presentation required?",
+      "blocking": false,
+      "context": "Current scenarios exercise a distinct nonempty password without adding unsupported limits."
+    },
+    {
+      "question": "Should invalid, expired and consumed reset links use identical neutral error wording?",
+      "blocking": false,
+      "context": "No particular error text is specified; the tests require no credential mutation or sensitive disclosure."
+    },
+    {
+      "question": "What authorized same-process sink-inspection procedure and perceivable validation/progress wording should local demonstrators use?",
+      "blocking": false,
+      "context": "The tests use a private fixture and prohibit public bearer-link or notification endpoints."
+    },
+    {
+      "question": "How should unknown account identifiers be accounted for, if at all, under recovery-request controls?",
+      "blocking": false,
+      "context": "The standard sets five per account per hour; the approved design limits known synthetic accounts and retains unknown-account public parity without imposing a numeric unknown quota."
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "TC-001",
+      "title": "Sign-in card and heading",
+      "requirement_ids": [
+        "REQ-001"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: An isolated local app is available to an anonymous client. Test data: GET `/sign-in`; pictured wireframe A. Action: Request `/sign-in` without authenticating and parse the returned HTML and local stylesheet.",
+        "Locate the semantic “Sign in” heading and its surrounding rectangular card; inspect page background, outline and centering declarations.",
+        "Compare the rendered page at a normal desktop viewport with A; check that the heading and outline are perceivable and readable."
+      ],
+      "expected_results": [
+        "Response succeeds with server-supplied HTML containing the card and one prominent “Sign in” heading.",
+        "Local styling specifies a white page and centered, thin dark outlined rectangular card; the heading is inside it.",
+        "Human/browser inspection confirms the pictured composition and readable contrast. HTML/CSS assertions alone are **partial**, not proof of pixel fidelity or accessibility."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        },
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        }
+      ]
+    },
+    {
+      "id": "TC-002",
+      "title": "Labeled sign-in email field",
+      "requirement_ids": [
+        "REQ-002"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Anonymous sign-in page is reachable. Test data: exact label `Email address`; exact placeholder `name@example.com`. Action: GET `/sign-in` and locate the email input and its associated label.",
+        "Parse the control's `type`, placeholder and label relationship; tab to it in a browser."
+      ],
+      "expected_results": [
+        "The server response contains an editable email control with visible `Email address` text and `name@example.com` placeholder.",
+        "The label is programmatically associated with the control, its accessible name is “Email address,” and keyboard focus is visible; a placeholder alone does not count as a label."
+      ],
+      "source_references": [
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        }
+      ]
+    },
+    {
+      "id": "TC-003",
+      "title": "Pictured password field versus runtime masking",
+      "requirement_ids": [
+        "REQ-003"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Anonymous sign-in form is reachable. Test data: exact `Password` label and `********` placeholder; distinct sample password `DemoSecret!`. Action: GET `/sign-in`; inspect the password label association, exact placeholder and `type=\"password\"` markup.",
+        "In a browser, tab to the field, type `DemoSecret!` and inspect the displayed input.",
+        "Submit an invalid sign-in and inspect the response body and visible validation."
+      ],
+      "expected_results": [
+        "The field has an associated “Password” label, the literal `********` placeholder and password-type markup.",
+        "Typed `DemoSecret!` is not displayed as literal characters; the field is keyboard operable and focus perceivable. This runtime behavior is a proposed requirement, **not** a conclusion from A.",
+        "The response does not echo `DemoSecret!` in HTML or error text, and a user can perceive that sign-in failed without exposing the password."
+      ],
+      "source_references": [
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        }
+      ]
+    },
+    {
+      "id": "TC-004",
+      "title": "Recovery link appearance and semantics",
+      "requirement_ids": [
+        "REQ-004"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Anonymous sign-in page is reachable. Test data: exact text `Forgot password?`. Action: GET `/sign-in` and locate the anchor bearing the exact text.",
+        "Inspect anchor semantics and local style for blue underlined presentation; tab to the anchor and inspect rendered contrast/focus."
+      ],
+      "expected_results": [
+        "One visible, keyboard-focusable anchor reads “Forgot password?” rather than noninteractive decorative text.",
+        "The rendered link is blue and underlined, has a visible focus state and readable contrast; stylesheet assertions are only partial visual evidence. Its destination is verified separately in TC-005."
+      ],
+      "source_references": [
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-005",
+      "title": "Recovery navigation is available anonymously",
+      "requirement_ids": [
+        "REQ-005"
+      ],
+      "task_ids": [
+        "TASK-003",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Anonymous client at `/sign-in`. Test data: link `href` extracted from the rendered “Forgot password?” anchor. Action: Extract and follow that anchor as an unauthenticated client.",
+        "Inspect the returned page for a server-rendered reset-request form and labeled email control; activate the link with keyboard in a browser."
+      ],
+      "expected_results": [
+        "The link stays within the local application and opens the reset-request page without a prior session; it does not navigate to an external service or disclose a private sink.",
+        "The response contains a usable email request form, and keyboard activation reaches it. Navigation is proposed flow behavior, not observed in the static wireframe."
+      ],
+      "source_references": [
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-006",
+      "title": "Sign-in submit control",
+      "requirement_ids": [
+        "REQ-006"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Anonymous sign-in form is reachable. Test data: exact button text `Sign in`. Action: GET `/sign-in` and locate the sign-in form's submit button and local styles.",
+        "Inspect rendered width, dark fill, readable text contrast and keyboard focus; submit the form with the keyboard."
+      ],
+      "expected_results": [
+        "A genuine submit button reads “Sign in”; stylesheet specifies wide dark presentation.",
+        "Browser rendering is visibly wide/dark with readable contrast, visible focus and keyboard submission. Markup/CSS assertions do not alone prove rendered appearance or operation."
+      ],
+      "source_references": [
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        }
+      ]
+    },
+    {
+      "id": "TC-007",
+      "title": "Footer text and placement",
+      "requirement_ids": [
+        "REQ-007"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Anonymous sign-in page is reachable. Test data: exact sentence `No account? Contact your administrator.` Action: GET `/sign-in` and find the exact sentence in parsed DOM.",
+        "Inspect DOM order and browser rendering relative to the sign-in form/card."
+      ],
+      "expected_results": [
+        "The complete text, including punctuation, occurs visibly beneath the form/card, not as a placeholder or hidden element.",
+        "Browser inspection confirms readable placement below the controls; no unpictured contact route is required."
+      ],
+      "source_references": [
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        }
+      ]
+    },
+    {
+      "id": "TC-008",
+      "title": "Synthetic sign-in creates a revocable authenticated session",
+      "requirement_ids": [
+        "REQ-008"
+      ],
+      "task_ids": [
+        "TASK-002",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Fresh app with one configured synthetic hashed-password account and CSRF-protected sign-in; `/account` is guarded. Test data: that account's valid email/password; wrong password, unknown email and invalid/missing CSRF. Action: GET the form and POST valid credentials with valid CSRF; use the same cookie jar to GET `/account`.",
+        "In separate clean clients try wrong password, unknown email and missing/invalid CSRF; request `/account` after each.",
+        "Remove the first client's session registry entry or change its account epoch using an isolated fixture; retry `/account` with the original cookie."
+      ],
+      "expected_results": [
+        "The authenticated client can access `/account` across requests; a mere cookie presence is not the success criterion.",
+        "All three invalid submissions fail to grant access to `/account`, disclose no supplied password in response, and expose an understandable error.",
+        "The stale cookie cannot authorize the next protected request: the guard rejects/redirects it as unauthenticated."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        }
+      ]
+    },
+    {
+      "id": "TC-009",
+      "title": "Labeled account-email reset request",
+      "requirement_ids": [
+        "REQ-009"
+      ],
+      "task_ids": [
+        "TASK-003",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Fresh app and anonymous request client with a CSRF token. Test data: valid synthetic email; empty email; malformed email; invalid/missing CSRF. Action: GET `/forgot-password`, parse the server-supplied email label, editable field, CSRF field and submit action.",
+        "Submit a syntactically valid email with valid CSRF.",
+        "On isolated fixtures submit each invalid input/CSRF variant; inspect private link count before and after and browser validation/focus."
+      ],
+      "expected_results": [
+        "The visitor can focus a programmatically labeled account-email field and submit the form without JavaScript.",
+        "A rendered generic acknowledgement is returned, without a link or account-existence claim.",
+        "Invalid/missing input or CSRF produces no reset link and no successful reset request; validation is perceivable and keyboard-accessible. No unspecified exact error copy is asserted."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-010",
+      "title": "Eligible known request issues private usable link",
+      "requirement_ids": [
+        "REQ-010"
+      ],
+      "task_ids": [
+        "TASK-003",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Fresh app, private same-process sink fixture, known synthetic account below quota and controlled UTC clock. Test data: known normalized email and a separate unknown valid-format email; valid CSRF for each request. Action: Record sink count; POST a known email to `/forgot-password`, then privately obtain the added link.",
+        "Follow that link before expiry as an anonymous client.",
+        "Inspect public POST status/headers/body and accessible routes for bearer-link or sink disclosure; submit the unknown email in a comparable fixture."
+      ],
+      "expected_results": [
+        "Exactly one additional private reset-link event exists for the known account; its link is not empty.",
+        "The private link opens the account's server-rendered new-password form before expiry.",
+        "Neither acknowledgement nor public headers/endpoint publishes the link or token; the unknown account adds zero links. No external delivery is invoked."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-011",
+      "title": "Known, unknown and throttled public parity",
+      "requirement_ids": [
+        "REQ-011"
+      ],
+      "task_ids": [
+        "TASK-003",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Isolated equivalent request contexts, same HTTP method, valid-format normalized email inputs, valid CSRF/session state and controlled time; quota state prepared privately for the throttled branch. Test data: eligible known account A, unknown valid-format account U, already-five-accepted known account A in a comparable fixture. Action: Capture the full public response to an eligible known request, including status, public headers (including redirect target when present) and body.",
+        "Capture responses to otherwise equivalent unknown and throttled requests with comparable CSRF/session context; compare all public components without normalizing away account-dependent differences.",
+        "Inspect the sink in each isolated fixture separately, not through public HTTP."
+      ],
+      "expected_results": [
+        "The known request returns a generic acknowledgement without email, quota state, token or link.",
+        "Known, unknown and throttled responses have equal status, public headers/redirect destination and body; no existence/limit distinction is revealed. No timing-equality threshold is invented.",
+        "The eligible known branch adds one private link, the unknown and suppressed branches add zero; public parity must **not** be inferred from equal sink contents."
+      ],
+      "source_references": [
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-012",
+      "title": "Five accepted per known account in a rolling hour",
+      "requirement_ids": [
+        "REQ-012"
+      ],
+      "task_ids": [
+        "TASK-003",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Fresh isolated app, locked known-account quota, controllable UTC clock and private sink. Test data: known account A, independently seeded known account B; five requests for A accepted at `t0` (or distinct instants sharing the same oldest `t0`). Action: With valid CSRF, submit five requests for A from `t0`; count only accepted private links.",
+        "At `t0 + 3599 seconds`, submit A's sixth request; compare its public response with the accepted acknowledgement and count sink links again.",
+        "At `t0 + 3600 seconds`, submit A's next request; count sink links.",
+        "In parallel/independent state, submit a request for B before B reaches its own limit."
+      ],
+      "expected_results": [
+        "Five requests yield exactly five private links for A.",
+        "The sixth yields **zero additional** links, leaving A at five; its status, headers and body remain the same as the generic eligible/unknown response.",
+        "At the oldest acceptance +3600 boundary, one request can be accepted, raising the private link count to six overall while maintaining at most five accepted in the current rolling 3600-second window.",
+        "B's eligible request adds its own private link without consuming A's quota. No numeric unknown-account quota is imposed."
+      ],
+      "source_references": [
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-013",
+      "title": "Single-use and concurrent replay",
+      "requirement_ids": [
+        "REQ-013"
+      ],
+      "task_ids": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Fresh known account, private link fixture, valid CSRF and controlled clock before expiry. Test data: original password `Old!demo`, new passwords `First!demo`, `Second!demo`; a separate fresh link/isolated fixture for concurrent POSTs. Action: Privately obtain a fresh token; submit one valid reset POST with `First!demo`, then replay the same link with `Second!demo`.",
+        "Verify credentials and count owner-success events before/after replay.",
+        "With a separately issued unused link, coordinate two simultaneous valid reset POSTs carrying different passwords; record both outcomes, final accepted password and success-event count."
+      ],
+      "expected_results": [
+        "First submission succeeds; replay is rejected or reaches an unavailable-link state and cannot complete a second reset.",
+        "`First!demo` remains the accepted password, `Second!demo` is not accepted from the replay, and replay adds zero owner-success events.",
+        "Exactly one concurrent submission can succeed and exactly one success event is recorded; the final accepted password equals the **single** winner's submitted value, not both. Failed attempts do not mutate account credentials."
+      ],
+      "source_references": [
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-014",
+      "title": "Expiry measured from issuance at both boundaries",
+      "requirement_ids": [
+        "REQ-014"
+      ],
+      "task_ids": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Controlled UTC clock, known synthetic account and valid CSRF; separate isolated fixtures or independent unused links so the successful boundary check cannot consume the expired-case token. Test data: issuance time `t0`; candidate passwords `Before!demo` and `At!demo`. Action: Issue a link at `t0`, keep it unused, advance to `t0 + 29:59` and submit a valid reset with `Before!demo`.",
+        "In an independent fixture issue another link at `t0`, keep it unused, advance to exactly `t0 + 30:00` and submit with `At!demo`; retry later.",
+        "Open a third valid form at +29:59, advance to +30:00 before POST and submit to test POST-time revalidation."
+      ],
+      "expected_results": [
+        "The pre-expiry link completes the reset and `Before!demo` becomes the accepted password.",
+        "The **separate unused** link is rejected exactly at issuance +1800 seconds and later; `At!demo` never becomes the password and no success notification is created.",
+        "A form opened before expiry cannot bypass expiry at submission. Expiry is never extended by GET or measured from page-open time."
+      ],
+      "source_references": [
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-015",
+      "title": "Valid reset updates password; invalid submissions do not",
+      "requirement_ids": [
+        "REQ-015"
+      ],
+      "task_ids": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Fresh synthetic account, valid unexpired unused private link and CSRF-protected reset form. Test data: old password `Old!demo`, distinct nonempty new password `New!demo`; missing password, missing/invalid CSRF and invalid token in independent fixtures. Action: GET the valid link and inspect associated new-password label, password-type control and CSRF token; submit `New!demo` with valid CSRF.",
+        "Sign in from clean clients using first `Old!demo`, then `New!demo`; inspect the reset confirmation for password/link disclosure.",
+        "In separate untouched fixtures submit missing password, invalid/missing CSRF and invalid token; compare stored credential outcome, private success events and browser error/focus behavior."
+      ],
+      "expected_results": [
+        "An editable, labeled masked new-password form is server-rendered; valid submission gives a neutral success confirmation.",
+        "Old credentials no longer authorize sign-in; new credentials do; confirmation contains neither the password nor bearer link.",
+        "Each invalid attempt leaves the previously valid password unchanged, creates no success event and displays a perceivable error or neutral unavailable state. Only nonempty new input is assumed; no unsupported maximum length or additional policy is tested."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-016",
+      "title": "Reset invalidates every independent active session",
+      "requirement_ids": [
+        "REQ-016"
+      ],
+      "task_ids": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: App with known synthetic account A and separate account B, session registry/epoch guard and valid reset link for A. Test data: two independent cookie jars `A1`/`A2`, third reset client, B's own cookie jar. Action: Sign into A separately with `A1` and `A2`; prove each can GET guarded `/account`. Sign into B and prove B access.",
+        "Through the third client complete one valid reset for A.",
+        "Retry `/account` with each old cookie jar, then with B's jar for comparison."
+      ],
+      "expected_results": [
+        "Both A clients were independently authenticated before reset, rather than sharing a single cookie.",
+        "The reset completes once.",
+        "**Both** previously active A clients fail authentication on their next protected request; B remains authenticated. Revoking only the resetter's session is insufficient."
+      ],
+      "source_references": [
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-017",
+      "title": "Exactly one owner notification for each successful reset",
+      "requirement_ids": [
+        "REQ-017"
+      ],
+      "task_ids": [
+        "TASK-004",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Fresh synthetic owner, private same-process notification sink, controllable clock and sufficient request quota. Test data: two distinct fresh links for two sequential successful resets; replay, invalid and expired links as failure controls. Action: Record the count of **successful-reset notification events**, excluding link-request events; complete the first reset and privately inspect new events.",
+        "Privately issue and complete a second fresh reset; inspect event count and each recipient.",
+        "Replay a consumed link and try invalid/expired links; recheck success-event count and public HTML."
+      ],
+      "expected_results": [
+        "The first completion adds exactly one owner-addressed success event in the memory sink.",
+        "The second completion adds exactly one more, for two total; both recipients match that synthetic account's owner and neither event claims external delivery.",
+        "Failure controls add **zero** success events, and no private notification data or bearer link appears in public HTML."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-018",
+      "title": "Documented Python 3.12 Flask local startup",
+      "requirement_ids": [
+        "REQ-018"
+      ],
+      "task_ids": [
+        "TASK-001",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "steps": [
+        "Preconditions: Fresh local Python 3.12 environment with the project's documented dependencies; no hosting. Test data: documented local start/import command and GET requests for sign-in and recovery pages. Action: Review the local-only setup/start instructions and declare/verify the Python interpreter version is 3.12.",
+        "Follow those instructions to import/start the Flask app factory locally; GET `/sign-in` and `/forgot-password` using its test client."
+      ],
+      "expected_results": [
+        "Instructions identify a usable Python 3.12 local invocation, without a deployment prerequisite.",
+        "Factory imports/starts without startup error and Flask serves HTML responses containing sign-in and reset-request forms. This is a future check, not a claim startup has already succeeded."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        }
+      ]
+    },
+    {
+      "id": "TC-019",
+      "title": "Pages and state are server-rendered",
+      "requirement_ids": [
+        "REQ-019"
+      ],
+      "task_ids": [
+        "TASK-001",
+        "TASK-002",
+        "TASK-003",
+        "TASK-004",
+        "TASK-005"
+      ],
+      "steps": [
+        "Preconditions: Local app and fixtures with a privately issued valid reset link, valid CSRF and clean clients. Test data: sign-in, reset-request, valid new-password, validation/error and success responses. Action: GET `/sign-in`, `/forgot-password` and the valid private link; parse response bodies without running scripts.",
+        "Submit representative valid and invalid forms and inspect returned server HTML/redirect destinations; repeat form navigation with browser JavaScript disabled."
+      ],
+      "expected_results": [
+        "Responses already contain usable headings, associated fields, form actions and CSRF controls for each requested page; no client-rendered bootstrap is needed to expose content.",
+        "Generic acknowledgement, reset confirmation or perceivable error content can be reached without a client-rendered app. Browser inspection validates practical non-JavaScript operation; only sign-in appearance is pictured."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        }
+      ]
+    },
+    {
+      "id": "TC-020",
+      "title": "Synthetic accounts and isolated app state",
+      "requirement_ids": [
+        "REQ-020"
+      ],
+      "task_ids": [
+        "TASK-001",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "steps": [
+        "Preconditions: Two separately instantiated local app factories and inspectable configuration/source. Test data: explicitly synthetic seeded account A and separately configured synthetic account B. Action: Inspect seed/configuration for synthetic account records and hashed sample credentials; sign in with a configured synthetic account.",
+        "Mutate account/session/reset state in app instance 1 and inspect independent instance 2.",
+        "Inspect code/dependencies/docs for a production identity integration or real account material."
+      ],
+      "expected_results": [
+        "Locally defined synthetic account signs in without reaching a real user database.",
+        "Instance 2 does not inherit instance 1's mutable sessions, tokens, quota or notifications; its synthetic fixture is independent.",
+        "Reviewed repository/config does not contain production identity integration or real credentials. Source inspection supports, but cannot prove the absence of every conceivable uninspected external interaction."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        }
+      ]
+    },
+    {
+      "id": "TC-021",
+      "title": "Memory-only private notification sink",
+      "requirement_ids": [
+        "REQ-021"
+      ],
+      "task_ids": [
+        "TASK-003",
+        "TASK-004",
+        "TASK-005",
+        "TASK-006"
+      ],
+      "steps": [
+        "Preconditions: Two independent local app instances, authorized same-process sink fixture and synthetic account. Test data: one eligible request link and one successful-reset notification. Action: Request a reset and complete it; inspect each event privately through the first instance's sink fixture.",
+        "Construct a second fresh app/restart-equivalent fixture; inspect its sink, and inspect the first app's public routes/responses for a sink or bearer-link endpoint.",
+        "Inspect source/configuration for real mail/SMS or other external notification transport."
+      ],
+      "expected_results": [
+        "The link event and owner success event are locally inspectable **only** in the first instance's in-memory sink.",
+        "Fresh instance has no inherited events; no public HTTP endpoint or response reveals links/sink entries.",
+        "No external delivery is required or configured; the check does not claim production persistence or actual email delivery."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        }
+      ]
+    },
+    {
+      "id": "TC-022",
+      "title": "Pytest regression suite covers approved behavior",
+      "requirement_ids": [
+        "REQ-022"
+      ],
+      "task_ids": [
+        "TASK-005",
+        "TASK-006"
+      ],
+      "steps": [
+        "Preconditions: Application and tests have been implemented and local Python 3.12 test dependencies installed; not yet true at design time. Test data: isolated fixtures, fixed/advancing UTC clock, distinct synthetic users and independent cookie jars. Action: Review test files to map prospective TC-001–TC-021 checks to assertions, including HTML semantics, invalid input/CSRF, private effects and authorization.",
+        "Check explicit known/unknown/throttled status/headers/body parity, five/six/+3599/+3600 link counts, unused +29:59/+30:00 token boundaries, replay/concurrent completion, old-session invalidation and one owner event per success.",
+        "After implementation, run documented `python3.12 -m pytest` locally and record its actual exit status and failures."
+      ],
+      "expected_results": [
+        "Tests assert concrete outcomes for REQ-001–REQ-021; HTML/CSS-only assertions are labeled partial for visual/accessibility fidelity.",
+        "The listed boundary/security behaviors are exercised with public responses and private effects checked separately, without sleeps, real accounts or external messaging.",
+        "A successful future run exits zero with passing tests; any failure is reported, not waived or presented here as already run. Documentation and no-deployment checks remain inspection-only."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TC-023",
+      "title": "Production limitations are explicitly documented",
+      "requirement_ids": [
+        "REQ-023"
+      ],
+      "task_ids": [
+        "TASK-006"
+      ],
+      "steps": [
+        "Preconditions: Delivered project documentation and local demonstration instructions are available. Test data: README/local setup and production-limitation sections. Action: Read documented local Python 3.12 startup, synthetic-account use and authorized private sink inspection procedure.",
+        "Inspect limitation statements for memory loss on process restart, single-process/worker boundary, non-durable quota/session revocation, absence of real email and missing production reliability/security operations.",
+        "Check whether documentation misleadingly calls the demo production-ready or instructs public bearer-link display."
+      ],
+      "expected_results": [
+        "A local reader can identify the synthetic account and in-memory sink as demonstration mechanisms, not real identity or delivery.",
+        "Documentation explicitly says the app is **not production-ready as-is** and describes the listed memory/durability/multi-worker and operational limits.",
+        "No public sink inspection or unwarranted production/deployment claim is present. This is a proposed review criterion, not a claim the docs already exist."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        }
+      ]
+    },
+    {
+      "id": "TC-024",
+      "title": "No deployment workflow, instructions or action",
+      "requirement_ids": [
+        "REQ-024"
+      ],
+      "task_ids": [
+        "TASK-006"
+      ],
+      "steps": [
+        "Preconditions: Final delivery diff/tree and authorized work/delivery record are available. Test data: workflow manifests, deploy scripts, hosting configuration, project docs and deployment action history. Action: Inspect the delivered diff/tree for newly added deployment workflow manifests, deploy scripts and hosting/deploy configuration.",
+        "Read project docs for instructions to deploy the app.",
+        "Inspect the work/delivery record for any performed deployment action; record any inaccessible records as a verification limitation rather than inferring absence from source."
+      ],
+      "expected_results": [
+        "No newly added deployment workflows, scripts or deployment configuration appear in delivered changes.",
+        "No deployment instructions were added.",
+        "The accessible work record shows no deployment was performed; if the record is unavailable, that part remains explicitly **unverified**. Source inspection alone does not establish that no deployment happened."
+      ],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-8000"
+        }
+      ]
+    }
+  ]
+}

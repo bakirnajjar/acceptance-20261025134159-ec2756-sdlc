@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Request received · Local auth demo{% endblock %}
+{% block content %}
+  <section class="panel">
+    <h1>Request received</h1>
+    <p>If an account is eligible, reset instructions will be sent.</p>
+    <p><a href="{{ url_for('sign_in') }}">Back to sign in</a></p>
+  </section>
+{% endblock %}

@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.1",
+  "stage": "solution_design",
+  "source_references": [
+    {
+      "source_type": "user_story",
+      "source_id": "user_story",
+      "locator": "characters 0-16000"
+    },
+    {
+      "source_type": "attachment",
+      "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+      "locator": "sign-in-wireframe.png"
+    },
+    {
+      "source_type": "knowledge",
+      "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+      "locator": "v1, chunk 0"
+    }
+  ],
+  "assumptions": [
+    "A1. Synthetic credentials may sign in to demonstrate revocable sessions; no particular account list, password policy beyond a usable new password, or signed-in content is specified.",
+    "A2. Consistently normalized email identifies a synthetic account. Only the static sign-in composition is observed; reset, error, success and authenticated screens and their copy are proposed, not pictured.",
+    "A3. Authorized local tests or same-process demonstration code inspect reset links and successful-reset events in a private in-memory sink; no real email or public link inspection endpoint exists.",
+    "A4. Interpret five reset requests per account per hour as a rolling 3600-second window of accepted requests for each known synthetic account; do not infer a numeric quota for unknown identifiers.",
+    "A5. Interpret expiry as usable while now is strictly earlier than issued_at plus 30 minutes and invalid at or after that instant; this boundary convention is a design interpretation.",
+    "A6. One process and one isolated in-memory store are the local demonstration boundary. A restart loses accounts' mutable state, sessions, quotas, tokens and notifications; neither persistence nor multi-worker coordination is promised."
+  ],
+  "open_questions": [
+    {
+      "question": "What exact layout and copy should the unpictured recovery, invalid-link, success and minimal authenticated screens use?",
+      "blocking": false,
+      "context": "Only the supplied static sign-in card is observed; proposed pages remain subject to review."
+    },
+    {
+      "question": "Is a password policy beyond a nonempty new password required, and what minimal signed-in result should be approved?",
+      "blocking": false,
+      "context": "No additional password policy or post-sign-in UX was supplied."
+    },
+    {
+      "question": "Should invalid, used and expired links share the proposed neutral error copy?",
+      "blocking": false,
+      "context": "The standard sets link lifetime and single use, but not public error wording."
+    },
+    {
+      "question": "What authorized same-process sink inspection procedure, accessible validation copy and progress treatment should local demonstrators use?",
+      "blocking": false,
+      "context": "Inspection cannot expose bearer links through an HTTP page or public logs."
+    },
+    {
+      "question": "If production use is separately scoped, who owns durability, multi-instance limits and revocation, timing/privacy review, secret rotation, reliable delivery and monitoring?",
+      "blocking": false,
+      "context": "The requested application is a local demonstration; no deployment is authorized."
+    }
+  ],
+  "architecture_summary": "Prospective local-only Python 3.12 Flask application factory renders Jinja sign-in and recovery pages and injects a UTC clock, cryptographic token generator, locked process-local synthetic-account/session/reset store and private in-memory notification sink. A revocable server-side session registry plus account epoch guards each protected request. Recovery accepts at most five known-account requests in a rolling hour while returning the same public acknowledgement for equivalent known, unknown and suppressed submissions; eligible links use random bearer tokens, a digest-only reset index and private sink delivery. An unused token remains usable only before 30 minutes from issuance. Reset POST revalidates and atomically commits a password-hash change, one-time token consumption, revocation of all account sessions and one owner-addressed sink event. Server-rendered sign-in styling follows only the observed static image; unpictured screens are proposals. Pytest will verify routes, private effects, boundaries and multiple clients; local documentation will state process-loss, single-worker, no-email and no-deployment limitations. This is a design, not a claim that the application or tests exist.",
+  "hosting": {
+    "kind": "none",
+    "notes": "Local execution only. Do not provision hosting, deploy, or add deployment workflows or instructions."
+  },
+  "tech_stack": {
+    "languages": ["Python 3.12"],
+    "frameworks": ["Flask", "Jinja", "pytest"],
+    "runtime": "Single local Python 3.12 process"
+  },
+  "quality_gates": {
+    "build": [],
+    "test": ["python3.12 -m pytest"],
+    "lint": []
+  },
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "title": "Local Flask foundation",
+      "description": "Create the Python 3.12 Flask application factory, Jinja template/static-asset foundation, injectable UTC clock, isolated process-local memory store and synthetic hashed-account seed/fixtures. Do not connect a real identity store or production service.",
+      "requirement_ids": ["REQ-018", "REQ-019", "REQ-020"],
+      "acceptance_criteria": [
+        "A documented local Python 3.12 invocation starts Flask and serves a server-rendered HTML page.",
+        "Two independently constructed app instances do not share synthetic accounts or mutable runtime state.",
+        "Inspection finds no real-account integration; this task establishes injectable state/time, not a deployed application."
+      ],
+      "depends_on": [],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-16000"
+        }
+      ]
+    },
+    {
+      "id": "TASK-002",
+      "title": "Sign-in screen and revocable sessions",
+      "description": "Render the pictured sign-in card and exact visible labels/placeholders/footer using semantic HTML and a local stylesheet. Implement password type=password (actual masking is an implementation requirement, not image-observed behavior), visible focus and associated labels; verify synthetic password hashes; protect POSTs with CSRF; create opaque registry-backed sessions with an account epoch and guarded /account; provide CSRF-protected sign-out. No unpictured signed-in-page appearance is asserted.",
+      "requirement_ids": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-006", "REQ-007", "REQ-008", "REQ-019"],
+      "acceptance_criteria": [
+        "GET /sign-in returns the outlined card on white, bold heading, labeled email with name@example.com, labeled password with ******** and type=password, blue underlined recovery link, wide dark button and exact footer.",
+        "Valid synthetic credentials reach an authenticated /account across requests; invalid credentials and CSRF failures do not.",
+        "A removed session or mismatched epoch fails the next protected request; a signed cookie alone does not grant access."
+      ],
+      "depends_on": ["TASK-001"],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-16000"
+        },
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        }
+      ]
+    },
+    {
+      "id": "TASK-003",
+      "title": "Private recovery request and quota",
+      "description": "Make the pictured recovery link navigate to a proposed server-rendered labeled email request form. For a syntactically valid known synthetic account, enforce a locked rolling five-accepted-requests/3600-second window, generate a cryptographically random URL-safe reset token, index only its digest and issued-at time, and record the link in a private in-memory sink. Unknown identifiers and suppressed known-account requests issue no links, but use the same public acknowledgement as accepted requests. Never display a private link or expose the sink over HTTP.",
+      "requirement_ids": ["REQ-005", "REQ-009", "REQ-010", "REQ-011", "REQ-012", "REQ-019", "REQ-021"],
+      "acceptance_criteria": [
+        "The link opens GET /forgot-password and valid request submissions return a rendered acknowledgement.",
+        "Otherwise equivalent known, unknown and suppressed POSTs have identical public status, headers and body without identifier, quota or link; comparison uses equivalent CSRF/session context.",
+        "Five known-account requests inside the rolling hour produce five private links, the sixth produces none, and a request at the oldest acceptance's +3600-second boundary can produce a new one.",
+        "Unknown identifiers create no link; no external delivery occurs."
+      ],
+      "depends_on": ["TASK-001", "TASK-002"],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-16000"
+        },
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TASK-004",
+      "title": "Single-use reset and atomic completion",
+      "description": "Render a proposed labeled new-password form for a valid link and a neutral unavailable-link state otherwise. On POST, validate CSRF/input and recheck digest, consumption and issue-based expiry under the same lock used by session creation; complete the new password hash, consumed token, account epoch/session revocation and one private owner-addressed success event together, before returning success. Keep link/password out of public responses and logs; no external notification service.",
+      "requirement_ids": ["REQ-013", "REQ-014", "REQ-015", "REQ-016", "REQ-017", "REQ-019", "REQ-021"],
+      "acceptance_criteria": [
+        "An unused link at 29:59 since issuance accepts a new password; a separate unused link at 30:00 or later cannot update it.",
+        "A link permits one successful completion only, including against simultaneous/replayed submissions; failed submissions add no success event.",
+        "The old password ceases to sign in and the new one works after success.",
+        "Two or more previously authenticated, independent clients all fail the next protected request.",
+        "Each completed reset records exactly one owner-addressed in-memory notification, never a notification claiming external delivery."
+      ],
+      "depends_on": ["TASK-002", "TASK-003"],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-16000"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TASK-005",
+      "title": "Pytest regression suite",
+      "description": "Add independent pytest fixtures for app factory, fixed/advancing UTC clock, synthetic accounts, private sink and multiple client cookie jars. Implement TC-001 through TC-022 in the Markdown verification matrix as automated checks; use no sleeps, live account or network notification. Run the suite locally with python3.12 -m pytest after implementing the application. This is a separate test task: TASK-001 through TASK-004 implement behavior and REQ-022 requires runnable pytest coverage here.",
+      "requirement_ids": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-006", "REQ-007", "REQ-008", "REQ-009", "REQ-010", "REQ-011", "REQ-012", "REQ-013", "REQ-014", "REQ-015", "REQ-016", "REQ-017", "REQ-018", "REQ-019", "REQ-020", "REQ-021", "REQ-022"],
+      "acceptance_criteria": [
+        "python3.12 -m pytest is documented and runs the tests for the sign-in/reset behavior under Python 3.12.",
+        "Tests assert both public outcomes and private effects, including five/six/boundary, before/at-expiry, replay, independent-client session invalidation and owner event per success.",
+        "TC-001–TC-022 collectively exercise every REQ-001–REQ-022 without pretending to test visual browser behavior from an image alone; no test is reported as passed in this design."
+      ],
+      "depends_on": ["TASK-002", "TASK-003", "TASK-004"],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-16000"
+        },
+        {
+          "source_type": "attachment",
+          "source_id": "941402b9-bfd8-414c-a6e4-2fc2dce190a1",
+          "locator": "sign-in-wireframe.png"
+        },
+        {
+          "source_type": "knowledge",
+          "source_id": "bcf198d8-a628-401c-8641-b726fcbd00b5",
+          "locator": "v1, chunk 0"
+        }
+      ]
+    },
+    {
+      "id": "TASK-006",
+      "title": "Local documentation and delivery audit",
+      "description": "Document local Python 3.12 setup, Flask startup, python3.12 -m pytest, synthetic credentials and authorized same-process/private-test sink inspection. Document process-restart state loss, single-worker limits, non-durable quota/revocation, no real account or notification delivery, and missing production-grade reliability/security operations. Review the delivered repository for the explicit no-deployment constraint; do not add deployment code, workflows, instructions or perform deployment.",
+      "requirement_ids": ["REQ-018", "REQ-020", "REQ-021", "REQ-022", "REQ-023", "REQ-024"],
+      "acceptance_criteria": [
+        "A reviewer can follow local-only setup/testing and identify why the demo is not production-ready.",
+        "Inspection confirms accounts are synthetic, sink remains memory-only, and tests have a runnable command.",
+        "Delivery/repository inspection finds no newly added deployment workflows or deploy instructions and no deployment action is performed; REQ-023 and REQ-024 are verified by documentation/repository inspection, not claimed to require pytest."
+      ],
+      "depends_on": ["TASK-005"],
+      "source_references": [
+        {
+          "source_type": "user_story",
+          "source_id": "user_story",
+          "locator": "characters 0-16000"
+        }
+      ]
+    }
+  ],
+  "coverage_dispositions": []
+}

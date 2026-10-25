@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "stage": "custom_document",
+  "stage_key": "acceptance_20261025134159_ec2756_risk",
+  "summary": "Nine prospective delivery risks for the local synthetic-account password-reset application cover every approved requirement REQ-001 through REQ-024. Priorities are proposed verification order, not empirical likelihood or evidence of defects.",
+  "source_references": [
+    {"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},
+    {"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"},
+    {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+    {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+    {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+    {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+    {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+  ],
+  "assumptions": [
+    "A1: A locally demonstrable synthetic sign-in and active session suffice; exact sign-in result and password policy remain unspecified.",
+    "A2: The reset-request identifier is an email, and reset pages are server-rendered; their exact styling and error wording are unspecified. Only the sign-in wireframe supplies visual detail.",
+    "A3: Known-account reset links and successful-reset notifications are observable in an in-memory sink for local demonstration and tests; no external delivery is assumed, and public reset-request responses contain no links.",
+    "A4: Interpret five requests per account per hour as a rolling hour for known synthetic accounts; do not infer an unknown-account numeric quota.",
+    "A5: Interpret expiry as invalid at or after 30 minutes measured from link issuance; this boundary convention is not a quotation of ACC-STD-02.",
+    "No implementation, test results, or measured likelihood/control-effectiveness evidence was supplied. The image appearance was directly observed in the user's message; the attachment read returned a reference, not image bytes. Five curated standard hits have identical excerpts, not five independent policies or one uniquely designated source. The approved requirements_analysis predecessor was read by stage key only; no stage-output locator is asserted."
+  ],
+  "open_questions": [
+    {"question":"What exact sign-in result and password policy should be used?","blocking":false,"context":"A1 permits a minimal locally demonstrable sign-in/session flow without inventing additional policy."},
+    {"question":"How should unknown identifiers be treated under the five-per-account-per-hour limit?","blocking":false,"context":"A4 covers known synthetic accounts only; public responses must remain indistinguishable."},
+    {"question":"What presentation and error wording should reset-request and new-password pages use?","blocking":false,"context":"A2 leaves reset-page specifics open; the supplied wireframe covers sign-in only."},
+    {"question":"How should reset links be delivered without production notification infrastructure?","blocking":false,"context":"A3 uses an in-memory sink for local observation and tests, never a public reset-request response."}
+  ],
+  "sections": [
+    {"heading":"Evidence and interpretation","body":"The complete user story (S) specifies Python 3.12, Flask, server-rendered pages, pytest, synthetic accounts, an in-memory notification sink, production limitations, and no deployment/workflows. The supplied sign-in image (A) was directly observed in the user's message; the attachment tool returned a reference only. K1–K5 are identically worded hits for the same account-recovery standard: ACC-STD-01 requires identical known/unknown reset responses and no more than five requests per account per hour; ACC-STD-02 requires single-use links expiring 30 minutes after issuance and invalidation of every active session on reset; ACC-STD-03 requires owner notification for every successful reset. Approved requirements REQ-001 through REQ-024 were read from requirements_analysis using its stage key; the tool provided no stage-output locator, so these requirement links are not fabricated source references."},
+    {"heading":"Priority and verification basis","body":"Priorities are proposed delivery-verification order, not numeric likelihood or confirmed defect severity. 'Must' focuses on viable recovery, privacy, request and token controls, session revocation, notification, and explicit runtime/scope restrictions; 'should' prioritizes visual/navigation fidelity and regression breadth after core behavior. Every linked requirement remains in scope irrespective of this triage. Mitigations are future checks, not claims that an implementation or test already exists."},
+    {"heading":"Coverage","body":"Stable crosswalk: RAF72C-001 links REQ-001–REQ-007, REQ-009, REQ-019; RAF72C-002 links REQ-008–REQ-010, REQ-015, REQ-020; RAF72C-003 links REQ-011; RAF72C-004 links REQ-011–REQ-012; RAF72C-005 links REQ-010, REQ-013–REQ-015; RAF72C-006 links REQ-008, REQ-016; RAF72C-007 links REQ-010, REQ-017, REQ-021; RAF72C-008 links REQ-011–REQ-017, REQ-022; RAF72C-009 links REQ-018–REQ-021, REQ-023–REQ-024. The union is all approved REQ-001 through REQ-024; there are no unapproved requirement links."}
+  ],
+  "items": [
+    {
+      "id":"RAF72C-001",
+      "title":"Sign-in wireframe and recovery navigation diverge",
+      "description":"If sign-in appearance or navigation diverges from the supplied image, visitors may miss or fail to reach recovery. Verify the white page, thin outlined rectangular card, bold Sign in heading, Email address/name@example.com field, masked Password/******** field, blue underlined Forgot password? link and its reset-request target, dark Sign in button, and No account? Contact your administrator. footer on the server-rendered page.",
+      "category":"UI and navigation","priority":"should",
+      "requirement_ids":["REQ-001","REQ-002","REQ-003","REQ-004","REQ-005","REQ-006","REQ-007","REQ-009","REQ-019"],"related_ids":[],
+      "source_references":[
+        {"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},
+        {"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"},
+        {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+      ]
+    },
+    {
+      "id":"RAF72C-002",
+      "title":"Synthetic sign-in and reset flow do not work end to end",
+      "description":"If synthetic sign-in, reset-request submission, link issuance, or password update does not form a usable flow, an owner may be unable to recover access. Exercise a synthetic account's sign-in and active session, request a reset, inspect its locally observable link in the in-memory sink rather than a public response, complete a valid reset, and sign in with the new password.",
+      "category":"Recovery flow","priority":"must",
+      "requirement_ids":["REQ-008","REQ-009","REQ-010","REQ-015","REQ-020"],"related_ids":[],
+      "source_references":[
+        {"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},
+        {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+      ]
+    },
+    {
+      "id":"RAF72C-003",
+      "title":"Public reset response reveals account existence",
+      "description":"If known and unknown identifiers receive different public reset-request outcomes, an observer could enumerate accounts. Compare otherwise equivalent public response content, message, and outcome for known and unknown identifiers, including absence of any reset link; do not infer an unknown-account numeric quota.",
+      "category":"Response privacy","priority":"must",
+      "requirement_ids":["REQ-011"],"related_ids":[],
+      "source_references":[
+        {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+      ]
+    },
+    {
+      "id":"RAF72C-004",
+      "title":"Reset-request limit is bypassed or discloses account status",
+      "description":"If known-account requests are counted incorrectly, excess links may be issued; if the public limit response changes by account existence, it may disclose status. For one known synthetic account, verify five accepted requests and a blocked sixth within a rolling hour, then acceptance outside that window, while checking public-response parity. Rolling-hour accounting is predecessor assumption A4, not a literal standard quote; no unknown-account quota is specified.",
+      "category":"Request throttling","priority":"must",
+      "requirement_ids":["REQ-011","REQ-012"],"related_ids":[],
+      "source_references":[
+        {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+      ]
+    },
+    {
+      "id":"RAF72C-005",
+      "title":"Reset link can be replayed or has incorrect expiry",
+      "description":"If a used or stale link succeeds, an invalid password change may occur; if expiry is computed incorrectly, a timely valid reset may fail. Verify usable issuance, successful password update before 30 minutes from issuance, rejected replay without password change, and rejected use at or after that 30-minute boundary without password change. The at-or-after boundary is predecessor assumption A5.",
+      "category":"Token lifecycle","priority":"must",
+      "requirement_ids":["REQ-010","REQ-013","REQ-014","REQ-015"],"related_ids":[],
+      "source_references":[
+        {"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},
+        {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+      ]
+    },
+    {
+      "id":"RAF72C-006",
+      "title":"Reset leaves existing sessions authenticated",
+      "description":"If any previously active session survives a successful reset, prior access to the account remains available. Sign in to the same synthetic account in multiple sessions, complete a reset, and verify that every previously active session is no longer authenticated.",
+      "category":"Session invalidation","priority":"must",
+      "requirement_ids":["REQ-008","REQ-016"],"related_ids":[],
+      "source_references":[
+        {"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},
+        {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+      ]
+    },
+    {
+      "id":"RAF72C-007",
+      "title":"Owner notification missing or demo link leaks publicly",
+      "description":"If a successful reset has no owner-addressed notification, the owner lacks the required notice; if demo sink/link data appears in a public reset response, it may expose a recovery path. Inspect an owner-addressed in-memory notification for every successful reset, without assuming external delivery, and verify that public reset-request responses contain no link.",
+      "category":"Notification and containment","priority":"must",
+      "requirement_ids":["REQ-010","REQ-017","REQ-021"],"related_ids":[],
+      "source_references":[
+        {"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},
+        {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+      ]
+    },
+    {
+      "id":"RAF72C-008",
+      "title":"Pytest coverage misses recovery regressions",
+      "description":"If automated scenarios omit critical recovery behavior, response parity, throttling, token, session, or notification regressions may go undetected. Run pytest scenarios covering known/unknown response parity, five-per-hour known-account requests, single use, pre-expiry usability and expiry from issuance, password update, all-session invalidation, and owner notification.",
+      "category":"Regression verification","priority":"should",
+      "requirement_ids":["REQ-011","REQ-012","REQ-013","REQ-014","REQ-015","REQ-016","REQ-017","REQ-022"],"related_ids":[],
+      "source_references":[
+        {"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},
+        {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+        {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+      ]
+    },
+    {
+      "id":"RAF72C-009",
+      "title":"Demo architecture or production-readiness boundary is misrepresented",
+      "description":"If runtime, rendering, accounts, or notifications depart from the local-demo scope, or production readiness/deployment is implied, the delivery may mislead users or exceed its authorization. Verify Python 3.12 with Flask and server-rendered sign-in/reset pages, synthetic-only accounts, an in-memory notification sink with no external delivery, explicit production limitations, and no deployment or newly added deployment workflows.",
+      "category":"Runtime and scope","priority":"must",
+      "requirement_ids":["REQ-018","REQ-019","REQ-020","REQ-021","REQ-023","REQ-024"],"related_ids":[],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"}]
+    }
+  ]
+}
