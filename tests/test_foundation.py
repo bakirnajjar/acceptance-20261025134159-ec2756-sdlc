@@ -1,6 +1,7 @@
-"""Incremental TC-018/019/020 checks for TASK-001 only."""
+"""Incremental TC-018/019/020 checks for the local foundation."""
 
 import hashlib
+import re
 import sys
 from datetime import UTC, datetime
 
@@ -22,7 +23,7 @@ def test_tc_018_python312_factory_serves_local_pages() -> None:
     assert app.test_client().get("/static/styles.css").status_code == 200
 
 
-def test_tc_019_foundation_forms_are_server_rendered_get_only() -> None:
+def test_tc_019_foundation_forms_are_server_rendered() -> None:
     client = create_app().test_client()
     sign_in = client.get("/sign-in").get_data(as_text=True)
     forgot = client.get("/forgot-password").get_data(as_text=True)
@@ -33,7 +34,19 @@ def test_tc_019_foundation_forms_are_server_rendered_get_only() -> None:
     assert '<label for="email">Email address</label>' in forgot
     assert '<link rel="stylesheet" href="/static/styles.css">' in forgot
     assert "<script" not in sign_in + forgot
-    assert client.post("/sign-in").status_code == 405
+    csrf = re.search(r'name="csrf_token" value="([^"]+)"', sign_in)
+    assert csrf is not None
+    signed_in = client.post(
+        "/sign-in",
+        data={
+            "csrf_token": csrf.group(1),
+            "email": "demo@example.test",
+            "password": "SamplePass!123",
+        },
+    )
+    assert signed_in.status_code == 302
+    assert signed_in.headers["Location"].endswith("/account")
+    assert "<h1>Account</h1>" in client.get("/account").get_data(as_text=True)
     assert client.post("/forgot-password").status_code == 405
 
 
