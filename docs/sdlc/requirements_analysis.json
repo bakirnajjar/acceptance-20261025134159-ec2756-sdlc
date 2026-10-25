@@ -12,11 +12,12 @@
   ],
   "assumptions": [
     "acceptance-20261025134159-ec2756-skill-sentinel — the acceptance skill produced this output.",
+    "acceptance-20261025134159-ec2756-same-agent-revision — same-run revision clarifies REQ-014's issuance-based expiry and pre-expiry usability while retaining A5 as the boundary interpretation.",
     "A1. For a demonstrable reset/session-invalidation flow, locally defined synthetic credentials can sign in; no additional password policy, production identity provider, persistent account store, or specific post-sign-in UX is specified. Source: S.",
     "A2. The reset-request form accepts an email as the account identifier, consistent with the shown “Email address” field; the reset pages have simple server-rendered presentation, but their exact appearance and error copy are unspecified. Sources: S, A.",
     "A3. Reset links for known synthetic accounts and successful-reset notifications are observable through the in-memory sink for local demonstration and tests; no real email is sent. Public reset-request responses do not contain links. Sources: S, K1–K5.",
     "A4. Interpret “per account per hour” as a rolling hour for known synthetic accounts. Unknown-account public responses remain indistinguishable, but no unsupported numeric quota for nonexistent accounts is inferred. Sources: K1–K5.",
-    "A5. Interpret “expire 30 minutes after issue” as invalid at or after the 30-minute boundary. Sources: K1–K5.",
+    "A5. Interpret “expire 30 minutes after issue” as invalid at or after the 30-minute boundary; this boundary convention is an implementation assumption, not a literal quote from ACC-STD-02. Sources: K1–K5.",
     "Evidence markers. The fully read story had next_offset: null and no story end marker; do not invent one. The attachment read yielded only its source reference and the supplied visual observation has no acceptance attachment marker; do not invent one. Sources: S, A."
   ],
   "open_questions": [
@@ -106,8 +107,8 @@
     },
     {
       "id":"REQ-014",
-      "statement":"Reset links expire 30 minutes after issuance.",
-      "acceptance_criteria":["Given a reset link was issued, when it is submitted at or after 30 minutes from issuance, then the reset is rejected without changing the password."],
+      "statement":"A reset link expires 30 minutes after issuance; an unused link remains usable before expiry.",
+      "acceptance_criteria":["Given an unused reset link issued less than 30 minutes ago, when it is submitted with a new password before the 30-minute expiry measured from issuance, then the reset can complete and update the password. Given a reset link issued 30 minutes ago or earlier, when it is submitted at or after 30 minutes from issuance, then the reset is rejected without changing the password."],
       "source_references":[{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
     },
     {
