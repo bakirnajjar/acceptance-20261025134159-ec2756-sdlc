@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "stage": "requirements_analysis",
+  "source_references": [
+    {"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},
+    {"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"},
+    {"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},
+    {"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},
+    {"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},
+    {"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},
+    {"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}
+  ],
+  "assumptions": [
+    "acceptance-20261025134159-ec2756-skill-sentinel — the acceptance skill produced this output.",
+    "A1. For a demonstrable reset/session-invalidation flow, locally defined synthetic credentials can sign in; no additional password policy, production identity provider, persistent account store, or specific post-sign-in UX is specified. Source: S.",
+    "A2. The reset-request form accepts an email as the account identifier, consistent with the shown “Email address” field; the reset pages have simple server-rendered presentation, but their exact appearance and error copy are unspecified. Sources: S, A.",
+    "A3. Reset links for known synthetic accounts and successful-reset notifications are observable through the in-memory sink for local demonstration and tests; no real email is sent. Public reset-request responses do not contain links. Sources: S, K1–K5.",
+    "A4. Interpret “per account per hour” as a rolling hour for known synthetic accounts. Unknown-account public responses remain indistinguishable, but no unsupported numeric quota for nonexistent accounts is inferred. Sources: K1–K5.",
+    "A5. Interpret “expire 30 minutes after issue” as invalid at or after the 30-minute boundary. Sources: K1–K5.",
+    "Evidence markers. The fully read story had next_offset: null and no story end marker; do not invent one. The attachment read yielded only its source reference and the supplied visual observation has no acceptance attachment marker; do not invent one. Sources: S, A."
+  ],
+  "open_questions": [
+    {"question":"What exact sign-in result and password policy should be used?","blocking":false,"context":"A1: a minimal locally demonstrable sign-in/session flow; no additional policy assumed."},
+    {"question":"How should unknown account identifiers be treated under the five-per-account-per-hour limit?","blocking":false,"context":"A4: enforce per known synthetic account; keep public response indistinguishable and do not invent an unknown-account quota."},
+    {"question":"What precise presentation and error text should the reset-request and new-password pages use?","blocking":false,"context":"A2: simple server-rendered pages; wireframe appearance is specified only for sign-in."},
+    {"question":"How should links be delivered without production notification infrastructure?","blocking":false,"context":"A3: expose them in the in-memory sink for local testing, not in public request responses."}
+  ],
+  "requirements": [
+    {
+      "id":"REQ-001",
+      "statement":"The sign-in page displays a rectangular outlined card on a white page, headed “Sign in”.",
+      "acceptance_criteria":["Given a visitor opens the sign-in page, when the page renders, then an outlined rectangular sign-in card with the heading “Sign in” is visible against a white page."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},{"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"}]
+    },
+    {
+      "id":"REQ-002",
+      "statement":"The sign-in page displays an email input labeled “Email address” with the placeholder `name@example.com`.",
+      "acceptance_criteria":["Given the sign-in page is open, when its form renders, then the email input has that label and placeholder."],
+      "source_references":[{"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"}]
+    },
+    {
+      "id":"REQ-003",
+      "statement":"The sign-in page displays a password input labeled “Password” with masked entry and the wireframe’s `********` placeholder.",
+      "acceptance_criteria":["Given the sign-in page is open, when the password field renders and a visitor types into it, then the label and placeholder are displayed and entered characters are masked."],
+      "source_references":[{"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"}]
+    },
+    {
+      "id":"REQ-004",
+      "statement":"The sign-in page displays a blue, underlined “Forgot password?” link.",
+      "acceptance_criteria":["Given the sign-in page is open, when the card renders, then the blue underlined link with that exact text is visible."],
+      "source_references":[{"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"},{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-005",
+      "statement":"The “Forgot password?” link opens the reset-request flow.",
+      "acceptance_criteria":["Given the sign-in page is open, when the visitor follows the “Forgot password?” link, then a page or form for requesting a reset opens."],
+      "source_references":[{"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"},{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-006",
+      "statement":"The sign-in card displays a dark “Sign in” button.",
+      "acceptance_criteria":["Given the sign-in page is open, when the form renders, then a dark button with the text “Sign in” is visible."],
+      "source_references":[{"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"}]
+    },
+    {
+      "id":"REQ-007",
+      "statement":"The sign-in page displays the footer “No account? Contact your administrator.”",
+      "acceptance_criteria":["Given the sign-in page is open, when its footer renders, then this exact text is visible beneath the sign-in form/card."],
+      "source_references":[{"source_type":"attachment","source_id":"941402b9-bfd8-414c-a6e4-2fc2dce190a1","locator":"sign-in-wireframe.png"}]
+    },
+    {
+      "id":"REQ-008",
+      "statement":"A valid synthetic account can sign in and acquire an active session.",
+      "acceptance_criteria":["Given a configured synthetic account and its current credentials, when its owner submits the sign-in form, then that account has an authenticated active session that can later be invalidated by a reset."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"}]
+    },
+    {
+      "id":"REQ-009",
+      "statement":"The reset-request page accepts an account identifier to request a password reset.",
+      "acceptance_criteria":["Given a visitor has opened the reset-request flow, when the page renders, then the visitor can submit an account email for a reset request."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-010",
+      "statement":"A reset request for a known synthetic account issues a usable reset link.",
+      "acceptance_criteria":["Given a known synthetic account is below the request limit, when its email is submitted for a reset, then a link enabling that account's password-reset flow is issued through the application's in-memory mechanism."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-011",
+      "statement":"Reset-request responses do not reveal whether the requested account exists.",
+      "acceptance_criteria":["Given otherwise equivalent requests for a known account and an unknown identifier, when they are submitted, then the public response is identical, including the displayed message and response outcome; it does not expose existence or a reset link."],
+      "source_references":[{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-012",
+      "statement":"A known account cannot receive more than five reset requests per hour.",
+      "acceptance_criteria":["Given five reset requests were accepted for one synthetic account during the relevant hour, when a sixth request for that account arrives within that hour, then no additional reset link is issued for it; a request outside that window can be accepted."],
+      "source_references":[{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-013",
+      "statement":"A reset link cannot successfully reset a password more than once.",
+      "acceptance_criteria":["Given a valid link has completed a reset, when someone attempts a second reset with the same link, then the second reset is rejected without changing the password."],
+      "source_references":[{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-014",
+      "statement":"Reset links expire 30 minutes after issuance.",
+      "acceptance_criteria":["Given a reset link was issued, when it is submitted at or after 30 minutes from issuance, then the reset is rejected without changing the password."],
+      "source_references":[{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-015",
+      "statement":"Submitting a valid reset link with a new password updates that synthetic account's password.",
+      "acceptance_criteria":["Given an unexpired, unused reset link for a synthetic account, when the owner completes the reset with a new password, then the account accepts the new password for subsequent sign-in."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-016",
+      "statement":"Completing a successful password reset signs the account out of every active session.",
+      "acceptance_criteria":["Given the account has one or more active sessions, when its password reset completes, then each previously active session is no longer authenticated."],
+      "source_references":[{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-017",
+      "statement":"Every successful reset notifies its account owner.",
+      "acceptance_criteria":["Given a successful password reset, when the reset completes, then an owner-addressed notification of that reset is recorded; unsuccessful attempts do not count as successful resets."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-018",
+      "statement":"The application runs with Python 3.12 and Flask.",
+      "acceptance_criteria":["Given the documented local application setup uses Python 3.12, when the app is started, then Flask serves the password-reset application."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"}]
+    },
+    {
+      "id":"REQ-019",
+      "statement":"The application's sign-in and reset pages are server-rendered.",
+      "acceptance_criteria":["Given a request for a sign-in or reset page, when Flask handles it, then the response contains the page's rendered form/content from the server rather than depending on a client-rendered application."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"}]
+    },
+    {
+      "id":"REQ-020",
+      "statement":"The application uses synthetic accounts rather than real account records.",
+      "acceptance_criteria":["Given the app is started for local demonstration or tests, when an account is used, then it comes from synthetic account data, with no production identity integration."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"}]
+    },
+    {
+      "id":"REQ-021",
+      "statement":"Notifications use an in-memory sink rather than external delivery.",
+      "acceptance_criteria":["Given a reset-related notification is generated, when it is delivered, then it is inspectable in the in-memory sink and no real delivery service is required."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"}]
+    },
+    {
+      "id":"REQ-022",
+      "statement":"Automated pytest tests cover the implemented reset and sign-in requirements.",
+      "acceptance_criteria":["Given the project is installed for local testing, when pytest is run, then automated tests exercise the sign-in/reset flows, request parity and limit, link single-use and expiry, session invalidation, and owner notification."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"},{"source_type":"knowledge","source_id":"bcf198d8-a628-401c-8641-b726fcbd00b5","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"cce5b6f4-4162-4c51-b630-53f545d0ba49","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"1937b905-d187-4938-bf60-77b0df7f74b1","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"2609b851-90c5-4738-aae5-16c1eaa6d477","locator":"v1, chunk 0"},{"source_type":"knowledge","source_id":"99467581-e0f3-4ba3-a177-7343cb1097b5","locator":"v1, chunk 0"}]
+    },
+    {
+      "id":"REQ-023",
+      "statement":"The project documents production limitations.",
+      "acceptance_criteria":["Given a reader opens the project documentation, when they review the password-reset app's limitations, then they can identify that synthetic accounts and in-memory notifications are demonstration mechanisms and that the app is not production-ready as-is."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"}]
+    },
+    {
+      "id":"REQ-024",
+      "statement":"The delivered project contains no deployment or deployment workflow.",
+      "acceptance_criteria":["Given the delivered repository, when it is inspected, then there are no newly added deployment workflows or instructions to deploy, and the work does not deploy the app."],
+      "source_references":[{"source_type":"user_story","source_id":"user_story","locator":"characters 0-16000"}]
+    }
+  ]
+}
