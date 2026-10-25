@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "test_cases": [
+    {
+      "id": "TC-001",
+      "status": "manual",
+      "reason": "HTML and CSS assertions exist, but desktop browser comparison with the pictured card and readable contrast has not been performed."
+    },
+    {
+      "id": "TC-002",
+      "status": "manual",
+      "reason": "Markup and focus CSS are asserted; keyboard focus, accessible name and actual browser operation need inspection."
+    },
+    {
+      "id": "TC-003",
+      "status": "manual",
+      "reason": "Password-type markup and non-reflection are asserted; typed masking, keyboard operation and visible focus need browser verification."
+    },
+    {
+      "id": "TC-004",
+      "status": "manual",
+      "reason": "Anchor markup and CSS are asserted; rendered contrast, focus and keyboard accessibility need browser verification."
+    },
+    {
+      "id": "TC-005",
+      "status": "manual",
+      "reason": "Anonymous local HTTP navigation and form markup are tested; keyboard link activation in a browser is not."
+    },
+    {
+      "id": "TC-006",
+      "status": "manual",
+      "reason": "Button markup and color/width declarations are asserted; actual rendered appearance, focus and keyboard submission need browser inspection."
+    },
+    {
+      "id": "TC-007",
+      "status": "manual",
+      "reason": "Exact footer text and DOM order are tested; browser visibility and readable placement require visual inspection."
+    },
+    {
+      "id": "TC-008",
+      "status": "automated",
+      "reference": "tests/test_sign_in.py::test_tc_008_valid_credentials_use_digest_registry_and_guarded_account"
+    },
+    {
+      "id": "TC-009",
+      "status": "manual",
+      "reason": "Form, acknowledgement, invalid inputs and private-link counts are tested; browser field focus and accessible validation are not."
+    },
+    {
+      "id": "TC-010",
+      "status": "manual",
+      "reason": "Private link creation and public non-disclosure are tested; the no-external-delivery claim still needs source/configuration inspection."
+    },
+    {
+      "id": "TC-011",
+      "status": "automated",
+      "reference": "tests/test_recovery.py::test_tc_011_equivalent_public_responses_and_distinct_private_effects"
+    },
+    {
+      "id": "TC-012",
+      "status": "automated",
+      "reference": "tests/test_recovery.py::test_tc_012_rolling_window_boundary_independent_accounts_and_unknowns"
+    },
+    {
+      "id": "TC-013",
+      "status": "automated",
+      "reference": "tests/test_reset.py::test_tc_013_simultaneous_posts_only_one_wins"
+    },
+    {
+      "id": "TC-014",
+      "status": "automated",
+      "reference": "tests/test_reset.py::test_tc_014_issue_time_boundary_and_open_form_expiry"
+    },
+    {
+      "id": "TC-015",
+      "status": "manual",
+      "reason": "Credential mutation, failure controls, confirmation and form markup are tested; browser masking, focus and perceivable errors require inspection."
+    },
+    {
+      "id": "TC-016",
+      "status": "automated",
+      "reference": "tests/test_reset.py::test_tc_016_reset_revokes_all_owner_sessions_but_not_other_account"
+    },
+    {
+      "id": "TC-017",
+      "status": "automated",
+      "reference": "tests/test_reset.py::test_tc_017_tc_019_tc_021_private_owner_events_and_server_pages"
+    },
+    {
+      "id": "TC-018",
+      "status": "automated",
+      "reference": "tests/test_foundation.py::test_tc_018_python312_factory_serves_local_pages"
+    },
+    {
+      "id": "TC-019",
+      "status": "manual",
+      "reason": "Server-rendered HTML and form POST flow are tested; practical navigation with browser JavaScript disabled has not been checked."
+    },
+    {
+      "id": "TC-020",
+      "status": "manual",
+      "reason": "Synthetic account hashing and app-instance isolation are tested; the no-production-identity-integration claim requires source/configuration review."
+    },
+    {
+      "id": "TC-021",
+      "status": "manual",
+      "reason": "Private sink events, isolated instances and absent public routes are tested; absence of external mail/SMS transport needs source/configuration review."
+    },
+    {
+      "id": "TC-022",
+      "status": "manual",
+      "reason": "Pytest passed and a test checks TC-001 through TC-021 function-name coverage, but reviewing assertion depth and partial browser-only coverage requires human inspection."
+    },
+    {
+      "id": "TC-023",
+      "status": "manual",
+      "reason": "Production limitations and local-only procedures require documentation review; no pytest check establishes the full reading criterion."
+    },
+    {
+      "id": "TC-024",
+      "status": "manual",
+      "reason": "Repository/diff and deployment-action history require inspection; historical external action records are unavailable and source alone cannot establish no prior deployment."
+    }
+  ]
+}
